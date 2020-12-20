@@ -1,6 +1,9 @@
 <template>
   <div class="configuration">
     <h1>Configuration</h1>
+
+    <ConfigInput />
+
     <p>
       Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a browser
       directly, so this needs a CORS proxy server.
@@ -24,26 +27,19 @@
     </p>
     <p>
       The resulting access token can also (for a short time) be used in
-      <a href="https://demo.preservica.com/api/content/documentation.html"
+      <a href="https://eu.preservica.com/api/content/documentation.html"
         >the Swagger UI interface</a
       >
       (adjust URL to match your SaaS domain).
     </p>
-    <Button icon="pi pi-user" @click="greet" label="Say hello" />
   </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {useToast} from 'primevue/usetoast';
+import ConfigInput from '@/components/ConfigInput.vue';
 
 export default defineComponent({
-  setup() {
-    const toast = useToast();
-    const greet = () => {
-      toast.add({severity: 'info', summary: 'Message', detail: 'Hello', life: 3000});
-    };
-    return {greet};
-  },
+  components: {ConfigInput},
 });
 </script>
