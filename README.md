@@ -27,19 +27,23 @@ for some of [the Preservica APIs](https://developers.preservica.com/api-referenc
 This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScript, Yarn:
 
 - Please pick a preset: Manually select features
-- Check the features needed for your project: Choose Vue version, Babel, TS, Router, Vuex, CSS Pre-processors, Linter, Unit
+- Check the features needed for your project: Choose Vue version, Babel, TS, Router, Vuex, CSS
+  Pre-processors, Linter, Unit
 - Choose a version of Vue.js that you want to start the project with: 3.x (Preview)
 - Use class-style component syntax? No
-- Use Babel alongside TypeScript (required for modern mode, auto-detected polyfills, transpiling JSX)? Yes
+- Use Babel alongside TypeScript (required for modern mode, auto-detected polyfills, transpiling
+  JSX)? Yes
 - Use history mode for router? (Requires proper server setup for index fallback in production) Yes
-- Pick a CSS pre-processor (PostCSS, Autoprefixer and CSS Modules are supported by default): Sass/SCSS (with dart-sass)
+- Pick a CSS pre-processor (PostCSS, Autoprefixer and CSS Modules are supported by default):
+  Sass/SCSS (with dart-sass)
 - Pick a linter / formatter config: Prettier
 - Pick additional lint features: Lint on save, Lint and fix on commit
 - Pick a unit testing solution: Jest
 - Where do you prefer placing config for Babel, ESLint, etc.? In dedicated config files
 - Pick the package manager to use when installing dependencies: Yarn
 
-Next, upgraded Prettier to fix errors in the generated code.
+Next, upgraded Prettier to fix errors in the generated code, configured `.editorconfig` and Prettier
+rules, and added `vue.config.js`.
 
 ### Yarn
 
