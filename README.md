@@ -39,6 +39,8 @@ This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScri
 - Where do you prefer placing config for Babel, ESLint, etc.? In dedicated config files
 - Pick the package manager to use when installing dependencies: Yarn
 
+Next, upgraded Prettier to fix errors in the generated code.
+
 ### Yarn
 
 - Project setup: `yarn install`
