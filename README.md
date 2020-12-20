@@ -43,7 +43,7 @@ This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScri
 - Pick the package manager to use when installing dependencies: Yarn
 
 Next, upgraded Prettier to fix errors in the generated code, configured `.editorconfig` and Prettier
-rules, and added `vue.config.js`.
+rules, added `vue.config.js`, and added PrimeVue, PrimeIcons and PrimeFlex.
 
 ### Yarn
 

@@ -1,12 +1,18 @@
 <template>
   <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/">home</router-link> | <router-link to="/config">configuration</router-link> |
+    <router-link to="/indexes">indexed fields</router-link> |
+    <router-link to="/search">search</router-link>
   </div>
-  <router-view />
+  <router-view id="view" />
+  <Toast />
 </template>
 
 <style lang="scss">
+#view {
+  margin: auto;
+  max-width: 600px;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
