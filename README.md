@@ -18,6 +18,7 @@ for some of [the Preservica APIs](https://developers.preservica.com/api-referenc
   - Fetch possible facets from API
   - Fetch content when clicking result
 - Embedded Swagger UI with auto-refresh access token?
+- Show `curl` commands  
 - Publish on GitHub pages
 
 ## Development

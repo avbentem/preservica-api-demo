@@ -26,11 +26,13 @@
       authenticated by Preservica. See the documentation linked above.
     </p>
     <p>
-      The resulting access token can also (for a short time) be used in
-      <a href="https://eu.preservica.com/api/content/documentation.html"
-        >the Swagger UI interface</a
+      <s
+        >The resulting access token can also (for a short time) be used in
+        <a href="https://eu.preservica.com/api/content/documentation.html"
+          >the Swagger UI interface</a
+        >
+        (adjust URL to match your SaaS domain).</s
       >
-      (adjust URL to match your SaaS domain).
     </p>
   </div>
 </template>

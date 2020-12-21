@@ -11,8 +11,8 @@ export interface Config {
 export default createStore({
   state: {
     config: {
-      // This requires origin or x-requested-with header
-      proxy: 'https://cors-anywhere.herokuapp.com/',
+      // TODO add placeholder for URL, rather than just appending the URL
+      proxy: 'https://proxy.arjanvanbentem.nl/?url=',
       // With trailing slash
       host: 'https://eu.preservica.com/',
       username: '',
