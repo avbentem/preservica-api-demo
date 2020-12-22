@@ -1,18 +1,33 @@
 <template>
   <div id="nav">
-    <router-link to="/">home</router-link> | <router-link to="/config">configuration</router-link> |
-    <router-link to="/indexes">indexed fields</router-link> |
+    <router-link to="/">home</router-link>
+    |
+    <router-link to="/config">configuration</router-link>
+    |
+    <router-link to="/indexes">indexed fields</router-link>
+    |
     <router-link to="/search">search</router-link>
   </div>
   <router-view id="view" />
   <Toast />
 </template>
 
+<script lang="ts">
+import {provideAuth} from '@/plugins/Auth';
+
+export default {
+  setup() {
+    provideAuth();
+  },
+};
+</script>
+
 <style lang="scss">
 #view {
   margin: auto;
   max-width: 600px;
 }
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -4,11 +4,13 @@
  * @see https://developers.preservica.com/api-reference/6-access-token-api
  */
 
+import {ref} from 'vue';
+import {Config} from '@/store';
+
 /**
  * The minimum remaining lifetime before a token is considered expired.
  */
 const MIN_TTL_MS = 60 * 1000;
-import {Config} from '@/store';
 
 export interface AuthenticatedUser {
   // In the SaaS installation, user is really just the email address
@@ -27,10 +29,14 @@ export interface AuthenticatedUser {
 export class AuthService {
   // TODO get from store
   private config?: Config;
-  public user?: AuthenticatedUser;
+
+  public user = ref<AuthenticatedUser | undefined>(undefined);
+  public configured = ref(false);
+  public authorized = ref(false);
 
   setConfig(config: Config) {
     this.config = config;
+    this.configured.value = true;
   }
 
   async login(config?: Config) {
@@ -38,12 +44,13 @@ export class AuthService {
       this.setConfig(config);
     }
 
+    this.authorized.value = false;
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
     };
     const c = this.config;
-    const url = `${c?.proxy}${c?.host}/api/accesstoken/login`;
+    const url = `${c?.proxy}${c?.host}api/accesstoken/login`;
     // TODO percent-encode
     const body = `username=${c?.username}&password=${c?.password}&tenant=${c?.tenant}&includeUserDetails=true`;
     const res = await fetch(url, {
@@ -55,7 +62,7 @@ export class AuthService {
       throw new Error(res.statusText);
     }
     const json = await res.json();
-    this.user = {
+    this.user.value = {
       user: json.user,
       fullName: json.fullName,
       email: json.email,
@@ -66,7 +73,8 @@ export class AuthService {
       validFrom: Date.now(),
       validUntil: Date.now() + json.validFor * 60 * 1000,
     };
-    console.log(this.user);
+    console.log(this.user.value);
+    this.authorized.value = true;
   }
 
   async getToken(): Promise<string> {
@@ -74,12 +82,12 @@ export class AuthService {
       throw 'No credentials set';
     }
     // TODO we could actually refresh asynchronously and return the old token if time permits?
-    if (!this.user || this.user.validUntil - Date.now() < MIN_TTL_MS) {
+    if (!this.user.value || this.user.value.validUntil - Date.now() < MIN_TTL_MS) {
       await this.login();
     }
-    if (!this.user) {
+    if (!this.user.value) {
       throw 'Failed to authenticate';
     }
-    return this.user.token;
+    return this.user.value.token;
   }
 }

@@ -4,6 +4,9 @@
 
     <ConfigInput />
 
+    <h2 v-if="!configured">Please complete the form and hit "Save" or "Log in"</h2>
+    <h2 v-if="authorized">Welcome, {{ user.fullName }}</h2>
+
     <p>
       Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a browser
       directly, so this needs a CORS proxy server.
@@ -39,9 +42,14 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
+import {useAuth} from '@/plugins/Auth';
 import ConfigInput from '@/components/ConfigInput.vue';
 
 export default defineComponent({
+  setup() {
+    const {configured, authorized, user} = useAuth();
+    return {configured, authorized, user};
+  },
   components: {ConfigInput},
 });
 </script>

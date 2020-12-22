@@ -26,6 +26,8 @@
       </div>
     </div>
 
+    <Button icon="pi pi-save" @click="save" label="Save" />
+    &nbsp;
     <Button icon="pi pi-user" @click="login" label="Log in" />
     &nbsp;
     <Button icon="pi pi-lock" @click="getToken" label="Get token" />
@@ -36,15 +38,26 @@
 import {defineComponent, ref} from 'vue';
 import {useStore} from 'vuex';
 import {useToast} from 'primevue/usetoast';
-import {AuthService} from '@/services/AuthService';
 import {Config} from '@/store';
+import {useAuth} from '@/plugins/Auth';
 
 export default defineComponent({
   setup() {
     const toast = useToast();
     const store = useStore();
+    const auth = useAuth();
     const config = ref<Config>(store.state.config);
-    const authService = new AuthService();
+
+    const save = async (event: Event) => {
+      event.preventDefault();
+      auth.setConfig(config.value);
+      toast.add({
+        severity: 'info',
+        summary: 'Saved config',
+        detail: 'But not logging in yet',
+        life: 3000,
+      });
+    };
 
     const login = async (event: Event) => {
       toast.add({
@@ -54,17 +67,18 @@ export default defineComponent({
         life: 3000,
       });
       event.preventDefault();
-      await authService.login(config.value);
-      const t = await authService.getToken();
+      await auth.login(config.value);
+      const t = await auth.getToken();
       toast.add({severity: 'success', summary: 'New token', detail: t});
     };
 
     const getToken = async () => {
-      const t = await authService.getToken();
+      auth.setConfig(config.value);
+      const t = await auth.getToken();
       toast.add({severity: 'info', summary: 'Token', detail: t});
     };
 
-    return {config, login, getToken};
+    return {config, save, login, getToken};
   },
 });
 </script>

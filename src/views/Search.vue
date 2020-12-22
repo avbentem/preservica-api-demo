@@ -6,13 +6,16 @@
       <a href="https://developers.preservica.com/api-reference/8-content-api">the Content API</a> is
       used.
     </p>
+    <AuthWarning />
   </div>
 </template>
 
 <script lang="ts">
 import {defineComponent} from 'vue';
+import AuthWarning from '@/components/AuthWarning.vue';
 
 export default defineComponent({
+  components: {AuthWarning},
   setup() {
     return {};
   },
