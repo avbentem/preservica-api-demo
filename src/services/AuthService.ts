@@ -4,6 +4,9 @@
  * @see https://developers.preservica.com/api-reference/6-access-token-api
  */
 
+// TODO Module not found: Error: [CaseSensitivePathsPlugin] `[..]/node_modules/primevue/useToast.js`
+// does not match the corresponding path on disk `usetoast.js`.
+import {useToast} from 'primevue/usetoast';
 import {ref} from 'vue';
 import {Config} from '@/store';
 
@@ -27,6 +30,7 @@ export interface AuthenticatedUser {
 }
 
 export class AuthService {
+  private toast = useToast();
   // TODO get from store
   private config?: Config;
 
@@ -57,10 +61,21 @@ export class AuthService {
       method: 'POST',
       headers: headers,
       body: body,
+    }).catch((reason) => {
+      this.toast.add({severity: 'error', summary: `Failed to connect to server`, detail: reason});
+      throw new Error('Failed to connect to Preservica server');
     });
+
     if (!res.ok) {
+      this.toast.add({
+        severity: 'error',
+        summary: `${res.status}: ${res.statusText}`,
+        detail: await res.text(),
+      });
+      console.log(res);
       throw new Error(res.statusText);
     }
+
     const json = await res.json();
     this.user.value = {
       user: json.user,
@@ -79,6 +94,11 @@ export class AuthService {
 
   async getToken(): Promise<string> {
     if (!this.config) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Not configured',
+        detail: 'You need to set the configuration first',
+      });
       throw 'No credentials set';
     }
     // TODO we could actually refresh asynchronously and return the old token if time permits?
@@ -86,6 +106,7 @@ export class AuthService {
       await this.login();
     }
     if (!this.user.value) {
+      // Actually, login will already have thrown
       throw 'Failed to authenticate';
     }
     return this.user.value.token;
