@@ -39,8 +39,8 @@
       <AccordionTab header="XML (prettified)">
         <div class="xml">{{ xml }}</div>
       </AccordionTab>
-      <AccordionTab header="JSON (generated)">
-        <div class="json">{{ tree }}</div>
+      <AccordionTab header="JSON (derived)">
+        <div class="json">{{ json }}</div>
       </AccordionTab>
     </Accordion>
   </div>
@@ -48,6 +48,7 @@
 
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
+import {useToast} from 'primevue/usetoast';
 import {parseStringPromise} from 'xml2js';
 import format from 'xml-formatter';
 import AuthWarning from '@/components/AuthWarning.vue';
@@ -58,14 +59,18 @@ export default defineComponent({
 
   setup() {
     const {configured, fetchWithToken} = useAuth();
+    const toast = useToast();
 
     const xml = ref<string | undefined>(undefined);
-    const tree = ref<{} | undefined>(undefined);
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    const json = ref<{[index: string]: any} | undefined>(undefined);
+    const list = ref<{[index: string]: any}[] | undefined>(undefined);
+    /* eslint-enable  @typescript-eslint/no-explicit-any */
 
     const getData = async (verb: string, params?: string) => {
       // TODO add some loading indicator/button spinner
       xml.value = undefined;
-      tree.value = undefined;
+      json.value = undefined;
 
       const path = `OAI-PMH/?verb=${verb}${params ? `&${params}` : ''}`;
       const res = await fetchWithToken(path, {
@@ -84,9 +89,28 @@ export default defineComponent({
         lineSeparator: '\n',
       });
 
-      tree.value = await parseStringPromise(text, {
+      json.value = await parseStringPromise(text, {
         explicitArray: false,
         ignoreAttrs: true,
+      });
+
+      // Conversion from XML to JavaScript may introduce an excessive attribute that is in fact an
+      // array, like `header` for ListIdentifiers, `metadataFormat` for ListMetadataFormats, or
+      // `record` for ListRecords. Also, it may include `resumptionToken` for long results (more
+      // than 200 results). Here check if there's only one other attribute and if that's an array:
+      const data = json.value?.['OAI-PMH']?.[verb];
+
+      const keys = Object.keys(data).filter((key) => key !== 'resumptionToken');
+      const child = data[keys[0]];
+      list.value = keys.length === 1 && Array.isArray(child) ? child : [data];
+      const hasMore = data.resumptionToken !== undefined;
+      toast.add({
+        severity: 'info',
+        summary: verb,
+        detail: `Fetched ${list.value.length} result${list.value.length === 1 ? '' : 's'}${
+          hasMore ? ', and more available' : ''
+        }`,
+        life: 3000,
       });
     };
 
@@ -95,7 +119,7 @@ export default defineComponent({
     const listIdentifiers = async () => getData('ListIdentifiers', 'metadataPrefix=XIP');
     const listRecords = async () => getData('ListRecords', 'metadataPrefix=XIP');
 
-    return {configured, xml, tree, identify, listMetadataFormats, listIdentifiers, listRecords};
+    return {configured, xml, json, identify, listMetadataFormats, listIdentifiers, listRecords};
   },
 });
 </script>
