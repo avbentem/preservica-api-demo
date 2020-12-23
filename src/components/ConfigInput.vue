@@ -26,11 +26,26 @@
       </div>
     </div>
 
-    <Button icon="pi pi-save" @click="save" label="Save" />
+    <Button
+      icon="pi pi-save"
+      @click="save"
+      label="Save"
+      v-tooltip.top="'Set the configuration, but do not log in yet'"
+    />
     &nbsp;
-    <Button icon="pi pi-user" @click="login" label="Log in" />
+    <Button
+      icon="pi pi-user"
+      @click="login"
+      label="Log in"
+      v-tooltip.top="'Set the configuration and log in'"
+    />
     &nbsp;
-    <Button icon="pi pi-lock" @click="getToken" label="Get token" />
+    <Button
+      icon="pi pi-lock"
+      @click="getToken"
+      label="Get token"
+      v-tooltip.top="'Show the current token, or refresh if needed'"
+    />
   </div>
 </template>
 

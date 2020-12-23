@@ -11,7 +11,11 @@
       Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a browser
       directly, so this needs a CORS proxy server.
     </p>
-    <p>The Preservica APIs needs authorization, even for anonymous access.</p>
+    <p>
+      The Preservica APIs needs authorization, even for anonymous access. When logged in to
+      Preservica SaaS, the session cookie
+      <a href="https://eu.preservica.com/OAI-PMH/?verb=Identify">can be used</a>.
+    </p>
     <p>
       A successful login on
       <a href="https://developers.preservica.com/api-reference/6-access-token-api"

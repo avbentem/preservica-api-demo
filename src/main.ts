@@ -6,6 +6,7 @@ import Password from 'primevue/password';
 import PrimeVue from 'primevue/config';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -27,5 +28,7 @@ app.component('Checkbox', Checkbox);
 app.component('InputText', InputText);
 app.component('Password', Password);
 app.component('Toast', Toast);
+
+app.directive('tooltip', Tooltip);
 
 app.mount('#app');
