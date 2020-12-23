@@ -1,5 +1,13 @@
 /**
- * Authenticates on the Preservica Access Token API.
+ * Authenticate on the Preservica Access Token API and provide helpers for HTTP calls with an
+ * authorization header and some default header values.
+ *
+ * All class methods use arrow function expressions to ensure `this` is preserved and destructuring
+ * works, like:
+ *
+ * ```typescript
+ * const {configured, fetchWithToken} = useAuth();
+ * ```
  *
  * @see https://developers.preservica.com/api-reference/6-access-token-api
  */
@@ -34,49 +42,44 @@ export class AuthService {
   // TODO get from store
   private config?: Config;
 
-  public user = ref<AuthenticatedUser | undefined>(undefined);
-  public configured = ref(false);
-  public authorized = ref(false);
+  user = ref<AuthenticatedUser | undefined>(undefined);
 
-  setConfig(config: Config) {
+  /**
+   * Indicate if some configuration was set. This does not imply it is actually valid.
+   */
+  configured = ref(false);
+
+  /**
+   * Indicate if a successful authorization has occurred.
+   */
+  authorized = ref(false);
+
+  setConfig = (config: Config) => {
     this.config = config;
     this.configured.value = true;
-  }
+    this.authorized.value = false;
+  };
 
-  async login(config?: Config) {
+  login = async (config?: Config) => {
     if (config) {
       this.setConfig(config);
     }
 
     this.authorized.value = false;
-    const headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
+
     const c = this.config;
-    const url = `${c?.proxy}${c?.host}api/accesstoken/login`;
     // TODO percent-encode
     const body = `username=${c?.username}&password=${c?.password}&tenant=${c?.tenant}&includeUserDetails=true`;
-    const res = await fetch(url, {
+    const res = await this.fetchWithDefaults('api/accesstoken/login', {
       method: 'POST',
-      headers: headers,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
       body: body,
-    }).catch((reason) => {
-      this.toast.add({severity: 'error', summary: `Failed to connect to server`, detail: reason});
-      throw new Error('Failed to connect to Preservica server');
     });
 
-    if (!res.ok) {
-      this.toast.add({
-        severity: 'error',
-        summary: `${res.status}: ${res.statusText}`,
-        detail: await res.text(),
-      });
-      console.log(res);
-      throw new Error(res.statusText);
-    }
-
     const json = await res.json();
+
     this.user.value = {
       user: json.user,
       fullName: json.fullName,
@@ -88,11 +91,18 @@ export class AuthService {
       validFrom: Date.now(),
       validUntil: Date.now() + json.validFor * 60 * 1000,
     };
-    console.log(this.user.value);
-    this.authorized.value = true;
-  }
 
-  async getToken(): Promise<string> {
+    this.authorized.value = true;
+
+    this.toast.add({
+      severity: 'success',
+      summary: 'Got new token',
+      detail: this.user.value.token,
+      life: 2000,
+    });
+  };
+
+  getToken = async (): Promise<string> => {
     if (!this.config) {
       this.toast.add({
         severity: 'error',
@@ -110,5 +120,71 @@ export class AuthService {
       throw 'Failed to authenticate';
     }
     return this.user.value.token;
-  }
+  };
+
+  /**
+   * Enhance the given fetch request with a `Preservica-Access-Token` header (refreshing the token
+   * if needed), expanding the path to include the base host and optional CORS proxy server, and
+   * reporting errors in a toast.
+   *
+   * @param path the path to fetch (a full RequestInfo is not supported here)
+   * @param init as in regular invocation of fetch
+   */
+  fetchWithToken = async (path: string, init?: RequestInit): Promise<Response> => {
+    const token = await this.getToken();
+    return this.fetchWithDefaults(path, init, token);
+  };
+
+  private fullUrl = (path: string) => {
+    const fullTarget = this.config?.host + path;
+    if (this.config?.proxy) {
+      return `${this.config?.proxy}${encodeURIComponent(fullTarget)}`;
+    }
+    return fullTarget;
+  };
+
+  private fetchWithDefaults = async (
+    path: string,
+    init?: RequestInit,
+    token?: string
+  ): Promise<Response> => {
+    const defaults = {
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
+    const res = await fetch(this.fullUrl(path), {
+      ...defaults,
+      ...init,
+      headers: {
+        ...defaults.headers,
+        ...init?.headers,
+        // Leave out if not given; override even if already set
+        ...(token ? {'Preservica-Access-Token': token} : null),
+      },
+    }).catch((reason) => {
+      // For security reasons, specifics about what went wrong with a CORS request are not available
+      // to JavaScript code. All the code knows is that an error occurred. The only way to determine
+      // what specifically went wrong is to look at the browser's console for details.
+      this.toast.add({
+        severity: 'error',
+        summary: 'Failed to connect to proxy or server',
+        detail: reason,
+      });
+      throw new Error('Failed to connect to proxy or Preservica server');
+    });
+
+    if (!res.ok) {
+      this.toast.add({
+        severity: 'error',
+        summary: `${res.status}: ${res.statusText}`,
+        detail: (await res.text()) || path,
+      });
+      console.error(res);
+      throw new Error(res.statusText);
+    }
+
+    return res;
+  };
 }

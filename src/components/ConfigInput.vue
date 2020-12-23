@@ -48,8 +48,7 @@ export default defineComponent({
     const auth = useAuth();
     const config = ref<Config>(store.state.config);
 
-    const save = async (event: Event) => {
-      event.preventDefault();
+    const save = async () => {
       auth.setConfig(config.value);
       toast.add({
         severity: 'info',
@@ -59,21 +58,17 @@ export default defineComponent({
       });
     };
 
-    const login = async (event: Event) => {
+    const login = async () => {
       toast.add({
         severity: 'info',
         summary: 'Logging in',
         detail: config.value.username,
         life: 3000,
       });
-      event.preventDefault();
       await auth.login(config.value);
-      const t = await auth.getToken();
-      toast.add({severity: 'success', summary: 'New token', detail: t});
     };
 
     const getToken = async () => {
-      auth.setConfig(config.value);
       const t = await auth.getToken();
       toast.add({severity: 'info', summary: 'Token', detail: t});
     };
