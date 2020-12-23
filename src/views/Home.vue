@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home intro">
     <h1>Preservica APIs demo</h1>
     <p>
       This is a (work in progress) kitchen sink showing various usage examples for some of

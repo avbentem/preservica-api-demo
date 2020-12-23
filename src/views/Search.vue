@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div class="search intro">
     <h1>Search</h1>
     <p>
       Search could be performed using either CMIS or the API, but to use facets

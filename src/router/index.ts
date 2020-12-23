@@ -1,5 +1,6 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router';
-import Home from '../views/Home.vue';
+import Home from '@/views/Home.vue';
+import Configuration from '@/views/Configuration.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,11 +11,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/config',
     name: 'Configuration',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "config" */ '../views/Configuration.vue'),
+    component: Configuration,
   },
+  // Route level code-splitting; this generates a separate chunk (indexes.[hash].js) for this route
+  // which is lazy-loaded when the route is visited.
   {
     path: '/indexes',
     name: 'Indexed fields',

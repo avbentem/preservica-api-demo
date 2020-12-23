@@ -24,8 +24,19 @@ export default {
 
 <style lang="scss">
 #view {
+}
+
+.intro {
   margin: auto;
   max-width: 600px;
+}
+
+.json {
+  display: block;
+  font-family: monospace;
+  text-align: left;
+  unicode-bidi: embed;
+  white-space: pre;
 }
 
 #app {

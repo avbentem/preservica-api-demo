@@ -1,5 +1,5 @@
 <template>
-  <div class="configuration">
+  <div class="configuration intro">
     <h1>Configuration</h1>
 
     <ConfigInput />
