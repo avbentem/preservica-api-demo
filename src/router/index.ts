@@ -21,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "indexes" */ '../views/Indexes.vue'),
   },
   {
+    path: '/oai-pmh',
+    name: 'OAI-PMH',
+    component: () => import(/* webpackChunkName: "oai-pmh" */ '../views/OaiPmh.vue'),
+  },
+  {
     path: '/search',
     name: 'Search',
     component: () => import(/* webpackChunkName: "search" */ '../views/Search.vue'),

@@ -7,6 +7,8 @@
     <router-link to="/indexes">indexed fields</router-link>
     |
     <router-link to="/search">search</router-link>
+    |
+    <router-link to="/oai-pmh">oai-pmh</router-link>
   </div>
   <router-view id="view" />
   <Toast />
@@ -31,9 +33,12 @@ export default {
   max-width: 600px;
 }
 
-.json {
+.json,
+.xml {
   display: block;
-  font-family: monospace;
+  font-family: Monaco, 'lucida console', Consolas, monospace;
+  font-size: 0.7em;
+  overflow: scroll;
   text-align: left;
   unicode-bidi: embed;
   white-space: pre;
