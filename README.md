@@ -1,31 +1,34 @@
 # Preservica API demo
 
-A basic (work in progress) Vue.js and Twitter Bootstrap kitchen sink, showing various usage examples
-for some of [the Preservica APIs](https://developers.preservica.com/api-reference).
+A basic (work in progress) Vue.js and PrimeVue kitchen sink, showing various usage examples for some
+of [the Preservica APIs](https://developers.preservica.com/api-reference).
 
 :warning:  This is VERY MUCH work in progress.
 
 :warning:  This will need a CORS proxy to access the Preservica APIs from a browser.
 
+See it in action on <https://avbentem.github.io/preservica-api-demo>
+
 ## Wish list
 
 - Authorization
-  - Store credentials in local storage
+  - Store credentials in local storage (also to allow opening links in new tab/window)
   - ...but warn if credentials seem to have write access
-  - Re-authenticate whenever other demos need it
   - Router: enforce authorization when applicable
 - Search
   - Fetch possible facets from API
   - Fetch content when clicking result
 - Embedded Swagger UI with auto-refresh access token?
 - Show `curl` commands  
-- Publish on GitHub pages
 
 ## Development
 
-### Init
+This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScript, Yarn.
 
-This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScript, Yarn:
+<details>
+<summary>Details</summary>
+
+Initial `vue create` options:
 
 - Please pick a preset: Manually select features
 - Check the features needed for your project: Choose Vue version, Babel, TS, Router, Vuex, CSS
@@ -45,6 +48,7 @@ This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScri
 
 Next, upgraded Prettier to fix errors in the generated code, configured `.editorconfig` and Prettier
 rules, added `vue.config.js`, and added PrimeVue, PrimeIcons and PrimeFlex.
+</details>
 
 ### Yarn
 

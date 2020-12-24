@@ -6,4 +6,6 @@ module.exports = {
       return args;
     });
   },
+  // For GitHub Pages; https://cli.vuejs.org/guide/deployment.html#github-pages
+  publicPath: process.env.NODE_ENV === 'production' ? '/preservica-api-demo/' : '/',
 };
