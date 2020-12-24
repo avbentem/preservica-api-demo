@@ -7,25 +7,19 @@
     <h2 v-if="!configured">Please complete the form and hit "Save" or "Log in"</h2>
     <h2 v-if="authorized">Welcome, {{ user.fullName }}</h2>
 
+    <p>The Preservica APIs needs authorization, even for anonymous access.</p>
     <p>
-      Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a browser
-      directly, so this needs a CORS proxy server.
-    </p>
-    <p>
-      The Preservica APIs needs authorization, even for anonymous access. When logged in to
-      Preservica SaaS, the session cookie
-      <a href="https://eu.preservica.com/OAI-PMH/?verb=Identify">can be used</a>.
-    </p>
-    <p>
-      A successful login on
+      When logged in to Preservica SaaS, the session cookie
+      <a href="https://eu.preservica.com/OAI-PMH/?verb=Identify">will be used</a> when accessing the
+      APIs in a browser directly. But for most use cases, a successful login on
       <a href="https://developers.preservica.com/api-reference/6-access-token-api"
         >the Access Token API</a
       >
-      yields an access token and a refresh token. A successful token is valid for 15 minutes.
-      However, the refresh token is valid for the same short period as the access token (and can
-      only be used once), so is only useful when continuously accessing the API. In this demo the
-      refresh token is ignored, and instead a new login is performed whenever the access token has
-      expired.
+      is required and yields an access token and a refresh token. An access token is valid for 15
+      minutes and can be used in an HTTP header. However, the refresh token is valid for the same
+      short period as the access token (and can only be used once), so is only useful when
+      continuously accessing the API. In this demo the refresh token is ignored, and instead a new
+      login is performed whenever the access token has expired.
     </p>
     <p>
       A token can also be generated through the externally authenticated acquisition API. This

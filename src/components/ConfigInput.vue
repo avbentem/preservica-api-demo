@@ -5,7 +5,12 @@
     <div class="p-fluid p-formgrid p-grid">
       <div class="p-field p-col-12">
         <label for="proxy">CORS proxy</label>
-        <InputText id="proxy" type="text" v-model="config.proxy" />
+        <InputText id="proxy" type="text" v-model="config.proxy" aria-describedby="proxy-help" />
+        <p id="proxy-help" class="input-help">
+          Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a
+          browser on a different domain, so this needs a CORS proxy server.
+          <strong>A third-party proxy may log your credentials.</strong>
+        </p>
       </div>
       <div class="p-field p-col-12">
         <label for="host">API host</label>
