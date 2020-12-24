@@ -178,8 +178,12 @@ export class AuthService {
     if (!res.ok) {
       this.toast.add({
         severity: 'error',
-        summary: `${res.status}: ${res.statusText}`,
+        // HTTP/2 connections do not support res.statusText
+        // See also https://fetch.spec.whatwg.org/#concept-response-status-message
+        summary: `Error ${res.status}`,
         detail: (await res.text()) || path,
+        // Set some max lifetime, as very wide error messages may hide the toast's close button
+        life: 30000,
       });
       console.error(res);
       throw new Error(res.statusText);
