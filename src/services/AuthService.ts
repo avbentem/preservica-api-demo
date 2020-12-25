@@ -138,7 +138,8 @@ export class AuthService {
   private fullUrl = (path: string) => {
     const fullTarget = this.config?.host + path;
     if (this.config?.proxy) {
-      return `${this.config?.proxy}${encodeURIComponent(fullTarget)}`;
+      // Just append, without any encoding
+      return `${this.config?.proxy}${fullTarget}`;
     }
     return fullTarget;
   };

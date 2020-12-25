@@ -7,8 +7,10 @@
         <label for="proxy">CORS proxy</label>
         <InputText id="proxy" type="text" v-model="config.proxy" aria-describedby="proxy-help" />
         <p id="proxy-help" class="input-help">
-          Due to the server's (lack of) CORS settings, the Preservica APIs cannot be used from a
-          browser on a different domain, so this needs a CORS proxy server.
+          This demo runs in your browser, but the Preservica APIs do not support
+          <a href="https://developer.mozilla.org/docs/Web/HTTP/CORS">CORS</a>. A proxy server can
+          add CORS headers to use a browser on a different domain. The full API URL will be appended
+          without any encoding.
           <strong>A third-party proxy may log your credentials.</strong>
         </p>
       </div>
