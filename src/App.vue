@@ -44,11 +44,6 @@ export default {
   white-space: pre;
 }
 
-.input-help {
-  font-size: 0.8em;
-  text-align: left;
-}
-
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
