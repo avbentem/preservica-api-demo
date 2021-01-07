@@ -5,7 +5,8 @@ of [the Preservica APIs](https://developers.preservica.com/api-reference).
 
 :warning:  This is VERY MUCH work in progress.
 
-:warning:  This will need a CORS proxy to access the Preservica APIs from a browser.
+:warning:  This will need a CORS proxy to access the Preservica APIs from a browser. You can set it
+in the configuration screen when running the demo.
 
 See it in action on <https://avbentem.github.io/preservica-api-demo>
 
@@ -52,9 +53,14 @@ rules, added `vue.config.js`, and added PrimeVue, PrimeIcons and PrimeFlex.
 
 ### Yarn
 
-- Project setup: `yarn install`
+- Download project dependencies: `yarn install`
 
 - Compile and hot-reload for development: `yarn serve`
+
+  This runs on <http://localhost:9090> (or 9091 and up if ports are already in use) and also
+  [provides a proxy](./vue.config.js) for the API, to avoid CORS limitations. To use that, enter
+  `/proxy/` in the proxy field in the configuration screen when running the demo. (This does not
+  work on the GitHub Pages hosted version.)
 
 - Compile and minify for production: `yarn build`
 
