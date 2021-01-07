@@ -1,5 +1,5 @@
 /**
- * Provide global access to authorization state.
+ * Provide global access to authorization state and API helpers.
  */
 import {inject, provide} from 'vue';
 import {AuthService} from '@/services/AuthService';

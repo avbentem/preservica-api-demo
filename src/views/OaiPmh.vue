@@ -27,15 +27,71 @@
       label="List metadata formats"
     />
     &nbsp;
-    <Button icon="pi pi-cloud-download" @click="listIdentifiers" label="List identifiers" />
+    <br />
+    <br />
+
+    <div class="p-formgroup-inline p-jc-center">
+      <div class="p-field">
+        <label for="filterFrom">From</label>
+        <InputText
+          id="filterFrom"
+          type="text"
+          placeholder="yyyy-mm-ddThh:mm:ssZ"
+          v-model="filterFrom"
+        />
+      </div>
+      <div class="p-field">
+        <label for="filterUntil">Until</label>
+        <InputText
+          id="filterUntil"
+          type="text"
+          placeholder="yyyy-mm-ddThh:mm:ssZ"
+          v-model="filterUntil"
+        />
+      </div>
+      <div class="p-field">
+        <label for="filterResumptionToken">Resumption token</label>
+        <InputText id="filterResumptionToken" type="text" v-model="filterResumptionToken" />
+      </div>
+    </div>
+
+    <br />
+    <Button icon="pi pi-play" @click="listIdentifiers" label="List identifiers" />
     &nbsp;
-    <Button icon="pi pi-cloud-download" @click="listRecords" label="List records" />
+    <Button icon="pi pi-play" @click="listRecords" label="List records" />
   </div>
 
   <br />
 
   <div v-if="xml">
     <Accordion :activeIndex="0">
+      <AccordionTab header="Table">
+        <DataTable
+          :value="list"
+          sortMode="multiple"
+          :multiSortMeta="multiSortMeta"
+          :filters="filters"
+        >
+          <template #header>
+            <div style="text-align: right">
+              <i class="pi pi-search" style="margin: 4px 4px 0px 0px"></i>
+              <InputText v-model="filters['global']" placeholder="all-column search" size="50" />
+            </div>
+          </template>
+          <Column
+            v-for="col of columns"
+            :field="col.field"
+            :header="col.header"
+            :key="col.field"
+            :sortable="true"
+            filterMatchMode="contains"
+          >
+            <template #filter>
+              <InputText type="text" v-model="filters[col.field]" class="p-column-filter" />
+            </template>
+          </Column>
+        </DataTable>
+      </AccordionTab>
       <AccordionTab header="XML (prettified)">
         <div class="xml">{{ xml }}</div>
       </AccordionTab>
@@ -66,6 +122,18 @@ export default defineComponent({
     const json = ref<{[index: string]: any} | undefined>(undefined);
     const list = ref<{[index: string]: any}[] | undefined>(undefined);
     /* eslint-enable  @typescript-eslint/no-explicit-any */
+    const columns = [
+      ['header.identifier', 'ID'],
+      ['header.datestamp', 'Date'],
+      ['metadata.XIP.StructuralObject.Title', 'Title'],
+      ['metadata.XIP.StructuralObject.Description', 'Description'],
+      ['metadata.XIP.StructuralObject.SecurityTag', 'Security tag'],
+    ].map((tuple) => ({field: tuple[0], header: tuple[1]}));
+    const filters = ref({});
+    const multiSortMeta = ref([]);
+    const filterFrom = ref<string | undefined>('2020-01-01T00:00:00Z');
+    const filterUntil = ref<string | undefined>('2030-12-31T23:59:59Z');
+    const filterResumptionToken = ref<string | undefined>(undefined);
 
     const getData = async (verb: string, params?: string) => {
       // TODO add some loading indicator/button spinner
@@ -103,6 +171,7 @@ export default defineComponent({
       const keys = Object.keys(data).filter((key) => key !== 'resumptionToken');
       const child = data[keys[0]];
       list.value = keys.length === 1 && Array.isArray(child) ? child : [data];
+      filterResumptionToken.value = data.resumptionToken;
       const hasMore = data.resumptionToken !== undefined;
       toast.add({
         severity: 'info',
@@ -116,10 +185,30 @@ export default defineComponent({
 
     const identify = async () => getData('Identify');
     const listMetadataFormats = async () => getData('ListMetadataFormats');
-    const listIdentifiers = async () => getData('ListIdentifiers', 'metadataPrefix=XIP');
-    const listRecords = async () => getData('ListRecords', 'metadataPrefix=XIP');
 
-    return {configured, xml, json, identify, listMetadataFormats, listIdentifiers, listRecords};
+    const getFilterParams = () =>
+      `metadataPrefix=XIP&${filterFrom.value ? `&from=${filterFrom.value}` : ''}${
+        filterUntil.value ? `&until=${filterUntil.value}` : ''
+      }${filterResumptionToken.value ? `&resumptionToken=${filterResumptionToken.value}` : ''}`;
+    const listIdentifiers = async () => getData('ListIdentifiers', getFilterParams());
+    const listRecords = async () => getData('ListRecords', getFilterParams());
+
+    return {
+      configured,
+      xml,
+      json,
+      list,
+      columns,
+      filters,
+      filterFrom,
+      filterUntil,
+      filterResumptionToken,
+      multiSortMeta,
+      identify,
+      listMetadataFormats,
+      listIdentifiers,
+      listRecords,
+    };
   },
 });
 </script>
