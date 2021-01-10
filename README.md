@@ -24,12 +24,12 @@ See it in action on <https://avbentem.github.io/preservica-api-demo>
 
 ## Development
 
-This project was bootstrapped with Vue CLI v4.5.9, using Vue 3 preview, TypeScript, Yarn.
+This uses Vue 3 preview, PrimeVue, PrimeIcons and PrimeFlex with TypeScript.
 
 <details>
 <summary>Details</summary>
 
-Initial `vue create` options:
+This project was bootstrapped with Vue CLI v4.5.9. Initial `vue create` options:
 
 - Please pick a preset: Manually select features
 - Check the features needed for your project: Choose Vue version, Babel, TS, Router, Vuex, CSS
@@ -48,7 +48,7 @@ Initial `vue create` options:
 - Pick the package manager to use when installing dependencies: Yarn
 
 Next, upgraded Prettier to fix errors in the generated code, configured `.editorconfig` and Prettier
-rules, added `vue.config.js`, and added PrimeVue, PrimeIcons and PrimeFlex.
+rules, added `vue.config.js` to set the app's title, and added PrimeVue, PrimeIcons and PrimeFlex.
 </details>
 
 ### Yarn

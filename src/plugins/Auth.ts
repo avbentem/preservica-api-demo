@@ -1,8 +1,8 @@
 /**
  * Provide global access to authorization state and API helpers.
  */
-import {inject, provide} from 'vue';
-import {AuthService} from '@/services/AuthService';
+import { inject, provide } from 'vue';
+import { AuthService } from '@/services/AuthService';
 
 const authSymbol = Symbol();
 

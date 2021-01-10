@@ -12,7 +12,7 @@
     |
     <router-link to="/curl">curl</router-link>
   </div>
-  <router-view id="view" v-slot="{Component}">
+  <router-view id="view" v-slot="{ Component }">
     <keep-alive>
       <component :is="Component" />
     </keep-alive>
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import {provideAuth} from '@/plugins/Auth';
+import { provideAuth } from '@/plugins/Auth';
 
 export default {
   setup() {

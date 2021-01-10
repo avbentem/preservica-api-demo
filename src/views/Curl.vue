@@ -28,13 +28,13 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
-import {useAuth} from '@/plugins/Auth';
+import { defineComponent } from 'vue';
+import { useAuth } from '@/plugins/Auth';
 
 export default defineComponent({
   name: 'Curl',
   setup() {
-    const {lastCurl} = useAuth();
+    const { lastCurl } = useAuth();
     return {
       lastCurl,
     };

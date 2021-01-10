@@ -86,9 +86,9 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import { defineComponent, ref } from 'vue';
 import AuthWarning from '@/components/AuthWarning.vue';
-import {useAuth} from '@/plugins/Auth';
+import { useAuth } from '@/plugins/Auth';
 
 /**
  * API response for a single indexed field, like:
@@ -120,18 +120,18 @@ interface IndexedFieldsResponse {
 }
 
 export default defineComponent({
-  components: {AuthWarning},
+  components: { AuthWarning },
 
   setup() {
-    const {configured, fetchWithToken} = useAuth();
+    const { configured, fetchWithToken } = useAuth();
 
     const fields = ref<IndexedFieldsResponse | undefined>(undefined);
     const shortNames = ref<string[]>([]);
     const types = ref<string[]>([]);
     const filters = ref({});
     const multiSortMeta = ref([
-      {field: 'shortName', order: 1},
-      {field: 'displayName', order: 1},
+      { field: 'shortName', order: 1 },
+      { field: 'displayName', order: 1 },
     ]);
 
     const getFields = async () => {
@@ -141,7 +141,7 @@ export default defineComponent({
       types.value = [...new Set(fields?.value?.value.map((v) => v.type))];
     };
 
-    return {configured, fields, filters, multiSortMeta, shortNames, types, getFields};
+    return { configured, fields, filters, multiSortMeta, shortNames, types, getFields };
   },
 });
 </script>

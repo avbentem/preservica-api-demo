@@ -21,7 +21,7 @@ module.exports = {
           return req.originalUrl.substr('/proxy/'.length);
         },
         // Do not append the path to the result of the router function, which already includes it
-        pathRewrite: {'.*': ''},
+        pathRewrite: { '.*': '' },
         changeOrigin: true,
       },
     },

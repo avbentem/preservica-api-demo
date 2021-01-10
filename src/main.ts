@@ -1,4 +1,4 @@
-import {createApp} from 'vue';
+import { createApp } from 'vue';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Button from 'primevue/button';
@@ -27,7 +27,7 @@ const app = createApp(App);
 
 app.use(store);
 app.use(router);
-app.use(PrimeVue, {ripple: true});
+app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 
 app.component('Accordion', Accordion);

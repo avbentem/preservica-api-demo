@@ -5,13 +5,13 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
-import {useAuth} from '@/plugins/Auth';
+import { defineComponent } from 'vue';
+import { useAuth } from '@/plugins/Auth';
 
 export default defineComponent({
   setup() {
-    const {configured} = useAuth();
-    return {configured};
+    const { configured } = useAuth();
+    return { configured };
   },
 });
 </script>

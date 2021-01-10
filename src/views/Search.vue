@@ -11,11 +11,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import { defineComponent } from 'vue';
 import AuthWarning from '@/components/AuthWarning.vue';
 
 export default defineComponent({
-  components: {AuthWarning},
+  components: { AuthWarning },
   setup() {
     return {};
   },

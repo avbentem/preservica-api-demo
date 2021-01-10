@@ -103,24 +103,24 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
-import {useToast} from 'primevue/usetoast';
-import {parseStringPromise} from 'xml2js';
+import { defineComponent, ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import { parseStringPromise } from 'xml2js';
 import format from 'xml-formatter';
 import AuthWarning from '@/components/AuthWarning.vue';
-import {useAuth} from '@/plugins/Auth';
+import { useAuth } from '@/plugins/Auth';
 
 export default defineComponent({
-  components: {AuthWarning},
+  components: { AuthWarning },
 
   setup() {
-    const {configured, fetchWithToken} = useAuth();
+    const { configured, fetchWithToken } = useAuth();
     const toast = useToast();
 
     const xml = ref<string | undefined>(undefined);
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    const json = ref<{[index: string]: any} | undefined>(undefined);
-    const list = ref<{[index: string]: any}[] | undefined>(undefined);
+    const json = ref<{ [index: string]: any } | undefined>(undefined);
+    const list = ref<{ [index: string]: any }[] | undefined>(undefined);
     /* eslint-enable  @typescript-eslint/no-explicit-any */
     const columns = [
       ['header.identifier', 'ID'],
@@ -128,7 +128,7 @@ export default defineComponent({
       ['metadata.XIP.StructuralObject.Title', 'Title'],
       ['metadata.XIP.StructuralObject.Description', 'Description'],
       ['metadata.XIP.StructuralObject.SecurityTag', 'Security tag'],
-    ].map((tuple) => ({field: tuple[0], header: tuple[1]}));
+    ].map((tuple) => ({ field: tuple[0], header: tuple[1] }));
     const filters = ref({});
     const multiSortMeta = ref([]);
     const filterFrom = ref<string | undefined>('2020-01-01T00:00:00Z');

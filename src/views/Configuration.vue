@@ -39,15 +39,15 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
-import {useAuth} from '@/plugins/Auth';
+import { defineComponent } from 'vue';
+import { useAuth } from '@/plugins/Auth';
 import ConfigInput from '@/components/ConfigInput.vue';
 
 export default defineComponent({
   setup() {
-    const {configured, authorized, user} = useAuth();
-    return {configured, authorized, user};
+    const { configured, authorized, user } = useAuth();
+    return { configured, authorized, user };
   },
-  components: {ConfigInput},
+  components: { ConfigInput },
 });
 </script>

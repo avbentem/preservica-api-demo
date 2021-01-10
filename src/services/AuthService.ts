@@ -14,9 +14,9 @@
 
 // TODO Module not found: Error: [CaseSensitivePathsPlugin] `[..]/node_modules/primevue/useToast.js`
 // does not match the corresponding path on disk `usetoast.js`.
-import {useToast} from 'primevue/usetoast';
-import {ref} from 'vue';
-import {Config} from '@/store';
+import { useToast } from 'primevue/usetoast';
+import { ref } from 'vue';
+import { Config } from '@/store';
 
 /**
  * The minimum remaining lifetime before a token is considered expired.
@@ -172,7 +172,7 @@ export class AuthService {
         ...defaults.headers,
         ...init?.headers,
         // Leave out if not given; override even if already set
-        ...(token ? {'Preservica-Access-Token': token} : null),
+        ...(token ? { 'Preservica-Access-Token': token } : null),
       },
     });
 
