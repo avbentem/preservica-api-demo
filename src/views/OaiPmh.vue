@@ -187,7 +187,7 @@ export default defineComponent({
     const listMetadataFormats = async () => getData('ListMetadataFormats');
 
     const getFilterParams = () =>
-      `metadataPrefix=XIP&${filterFrom.value ? `&from=${filterFrom.value}` : ''}${
+      `metadataPrefix=XIP${filterFrom.value ? `&from=${filterFrom.value}` : ''}${
         filterUntil.value ? `&until=${filterUntil.value}` : ''
       }${filterResumptionToken.value ? `&resumptionToken=${filterResumptionToken.value}` : ''}`;
     const listIdentifiers = async () => getData('ListIdentifiers', getFilterParams());
