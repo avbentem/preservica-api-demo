@@ -11,6 +11,7 @@ import InputText from 'primevue/inputtext';
 import MultiSelect from 'primevue/multiselect';
 import Password from 'primevue/password';
 import PrimeVue from 'primevue/config';
+import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
@@ -41,6 +42,7 @@ app.component('Dropdown', Dropdown);
 app.component('InputText', InputText);
 app.component('MultiSelect', MultiSelect);
 app.component('Password', Password);
+app.component('Textarea', Textarea);
 app.component('Toast', Toast);
 
 app.directive('tooltip', Tooltip);
