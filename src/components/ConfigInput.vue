@@ -59,7 +59,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useToast } from 'primevue/usetoast';
+import { useToast } from 'primevue/components/toast/useToast';
 import { Config } from '@/store';
 import { useAuth } from '@/plugins/Auth';
 
