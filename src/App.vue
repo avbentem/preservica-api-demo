@@ -12,7 +12,11 @@
     |
     <router-link to="/curl">curl</router-link>
   </div>
-  <router-view id="view" />
+  <router-view id="view" v-slot="{Component}">
+    <keep-alive>
+      <component :is="Component" />
+    </keep-alive>
+  </router-view>
   <Toast />
 </template>
 
