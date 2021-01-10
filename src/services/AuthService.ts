@@ -181,7 +181,7 @@ export class AuthService {
       headers.push(`-H '${name}: ${value}'`);
     }
     // As the request.body stream will be needed by fetch, just assume init.body will do
-    const body = request.bodyUsed ? ` --data '${init?.body}'` : '';
+    const body = init?.body ? ` --data '${init?.body}'` : '';
     // As request.url will include the proxy, re-create the URL here
     this.lastCurl.value = `curl -v '${this.config?.host + path}' -X ${
       request.method
