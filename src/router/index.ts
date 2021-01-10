@@ -30,6 +30,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Search',
     component: () => import(/* webpackChunkName: "search" */ '../views/Search.vue'),
   },
+  {
+    path: '/curl',
+    name: 'curl',
+    component: () => import(/* webpackChunkName: "curl" */ '../views/Curl.vue'),
+  },
 ];
 
 const router = createRouter({

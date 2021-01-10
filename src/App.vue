@@ -9,6 +9,8 @@
     <router-link to="/search">search</router-link>
     |
     <router-link to="/oai-pmh">oai-pmh</router-link>
+    |
+    <router-link to="/curl">curl</router-link>
   </div>
   <router-view id="view" />
   <Toast />

@@ -54,6 +54,16 @@ export class AuthService {
    */
   authorized = ref(false);
 
+  /**
+   * The curl-alternative of the last executed API call. Any embedded token will not be refreshed,
+   * so may no longer be valid at the time the curl command is copied.
+   *
+   * This is not at all the same as the browser's fetch call; many headers such as `Origin`,
+   * `Referer`, `Accept-Encoding` and `Accept-Language` and  are not included, and curl will add
+   * `Host`, `User-Agent` and `Content-Length`.
+   */
+  lastCurl = ref('');
+
   setConfig = (config: Config) => {
     this.config = config;
     this.configured.value = true;
@@ -155,7 +165,7 @@ export class AuthService {
       },
     };
 
-    const res = await fetch(this.fullUrl(path), {
+    const request = new Request(this.fullUrl(path), {
       ...defaults,
       ...init,
       headers: {
@@ -164,7 +174,9 @@ export class AuthService {
         // Leave out if not given; override even if already set
         ...(token ? {'Preservica-Access-Token': token} : null),
       },
-    }).catch((reason) => {
+    });
+
+    const res = await fetch(request).catch((reason) => {
       // For security reasons, specifics about what went wrong with a CORS request are not available
       // to JavaScript code. All the code knows is that an error occurred. The only way to determine
       // what specifically went wrong is to look at the browser's console for details.
@@ -189,6 +201,17 @@ export class AuthService {
       console.error(res);
       throw new Error(res.statusText);
     }
+
+    const headers: string[] = [];
+    for (const [name, value] of request.headers.entries()) {
+      headers.push(`-H '${name}: ${value}'`);
+    }
+    // As the request.body stream will already have been read, just assume init.body will do
+    const body = request.bodyUsed ? ` --data '${init?.body}'` : '';
+    // As request.url will include the proxy, re-create the URL here
+    this.lastCurl.value = `curl -v '${this.config?.host + path}' -X ${
+      request.method
+    } ${headers.join(' ')}${body}`;
 
     return res;
   };
