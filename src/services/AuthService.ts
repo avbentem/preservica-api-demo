@@ -176,6 +176,17 @@ export class AuthService {
       },
     });
 
+    const headers: string[] = [];
+    for (const [name, value] of request.headers.entries()) {
+      headers.push(`-H '${name}: ${value}'`);
+    }
+    // As the request.body stream will be needed by fetch, just assume init.body will do
+    const body = request.bodyUsed ? ` --data '${init?.body}'` : '';
+    // As request.url will include the proxy, re-create the URL here
+    this.lastCurl.value = `curl -v '${this.config?.host + path}' -X ${
+      request.method
+    } ${headers.join(' ')}${body}`;
+
     const res = await fetch(request).catch((reason) => {
       // For security reasons, specifics about what went wrong with a CORS request are not available
       // to JavaScript code. All the code knows is that an error occurred. The only way to determine
@@ -201,17 +212,6 @@ export class AuthService {
       console.error(res);
       throw new Error(res.statusText);
     }
-
-    const headers: string[] = [];
-    for (const [name, value] of request.headers.entries()) {
-      headers.push(`-H '${name}: ${value}'`);
-    }
-    // As the request.body stream will already have been read, just assume init.body will do
-    const body = request.bodyUsed ? ` --data '${init?.body}'` : '';
-    // As request.url will include the proxy, re-create the URL here
-    this.lastCurl.value = `curl -v '${this.config?.host + path}' -X ${
-      request.method
-    } ${headers.join(' ')}${body}`;
 
     return res;
   };
