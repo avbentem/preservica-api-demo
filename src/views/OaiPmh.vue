@@ -32,6 +32,10 @@
 
     <div class="p-formgroup-inline p-jc-center">
       <div class="p-field">
+        <label for="metadataPrefix">Prefix</label>
+        <InputText id="metadataPrefix" type="text" v-model="metadataPrefix" />
+      </div>
+      <div class="p-field">
         <label for="filterFrom">From</label>
         <InputText
           id="filterFrom"
@@ -64,7 +68,7 @@
   <br />
 
   <div v-if="xml">
-    <Accordion :activeIndex="0">
+    <Accordion>
       <AccordionTab header="Table">
         <DataTable
           :value="list"
@@ -131,6 +135,7 @@ export default defineComponent({
     ].map((tuple) => ({ field: tuple[0], header: tuple[1] }));
     const filters = ref({});
     const multiSortMeta = ref([]);
+    const metadataPrefix = ref('oai_dc');
     const filterFrom = ref<string | undefined>('2020-01-01T00:00:00Z');
     const filterUntil = ref<string | undefined>('2030-12-31T23:59:59Z');
     const filterResumptionToken = ref<string | undefined>(undefined);
@@ -187,9 +192,11 @@ export default defineComponent({
     const listMetadataFormats = async () => getData('ListMetadataFormats');
 
     const getFilterParams = () =>
-      `metadataPrefix=XIP${filterFrom.value ? `&from=${filterFrom.value}` : ''}${
-        filterUntil.value ? `&until=${filterUntil.value}` : ''
-      }${filterResumptionToken.value ? `&resumptionToken=${filterResumptionToken.value}` : ''}`;
+      `metadataPrefix=${metadataPrefix.value}${
+        filterFrom.value ? `&from=${filterFrom.value}` : ''
+      }${filterUntil.value ? `&until=${filterUntil.value}` : ''}${
+        filterResumptionToken.value ? `&resumptionToken=${filterResumptionToken.value}` : ''
+      }`;
     const listIdentifiers = async () => getData('ListIdentifiers', getFilterParams());
     const listRecords = async () => getData('ListRecords', getFilterParams());
 
@@ -200,6 +207,7 @@ export default defineComponent({
       list,
       columns,
       filters,
+      metadataPrefix,
       filterFrom,
       filterUntil,
       filterResumptionToken,
