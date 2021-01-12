@@ -16,13 +16,15 @@
 // does not match the corresponding path on disk `usetoast.js`.
 // See https://github.com/primefaces/primevue/issues/813
 import { useToast } from 'primevue/components/toast/useToast';
-import { ref } from 'vue';
-import { Config } from '@/store';
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
+import { AppState } from '@/store';
 
 /**
- * The minimum remaining lifetime before a token is considered expired.
+ * The minimum remaining lifetime before a token is considered expired. The documented lifetime is
+ * 15 minutes, so always be on the safe side to allow the current API call to succeed.
  */
-const MIN_TTL_MS = 60 * 1000;
+const MIN_TTL_MS = 10 * 60 * 1000;
 
 export interface AuthenticatedUser {
   // In the SaaS installation, user is really just the email address
@@ -39,21 +41,15 @@ export interface AuthenticatedUser {
 }
 
 export class AuthService {
+  private store = useStore<AppState>();
   private toast = useToast();
-  // TODO get from store
-  private config?: Config;
 
   user = ref<AuthenticatedUser | undefined>(undefined);
 
   /**
    * Indicate if some configuration was set. This does not imply it is actually valid.
    */
-  configured = ref(false);
-
-  /**
-   * Indicate if a successful authorization has occurred.
-   */
-  authorized = ref(false);
+  configured = computed<boolean>(() => this.store.getters.configured);
 
   /**
    * The curl-alternative of the last executed API call. Any embedded token will not be refreshed,
@@ -65,22 +61,22 @@ export class AuthService {
    */
   lastCurl = ref('');
 
-  setConfig = (config: Config) => {
-    this.config = config;
-    this.configured.value = true;
-    this.authorized.value = false;
+  /**
+   * Clear the current user details, forcing a new login.
+   *
+   * We could automate this by watching the store's state, but we'd still want to reset this when
+   * commencing a login that may actually fail.
+   */
+  clearAuth = () => {
+    this.user.value = undefined;
   };
 
-  login = async (config?: Config) => {
-    if (config) {
-      this.setConfig(config);
-    }
+  login = async () => {
+    this.clearAuth();
 
-    this.authorized.value = false;
-
-    const c = this.config;
+    const config = this.store.state.config;
     // TODO percent-encode
-    const body = `username=${c?.username}&password=${c?.password}&tenant=${c?.tenant}&includeUserDetails=true`;
+    const body = `username=${config.username}&password=${config.password}&tenant=${config.tenant}&includeUserDetails=true`;
     const res = await this.fetchWithDefaults('api/accesstoken/login', {
       method: 'POST',
       headers: {
@@ -103,8 +99,6 @@ export class AuthService {
       validUntil: Date.now() + json.validFor * 60 * 1000,
     };
 
-    this.authorized.value = true;
-
     this.toast.add({
       severity: 'success',
       summary: 'Got new token',
@@ -114,7 +108,7 @@ export class AuthService {
   };
 
   getToken = async (): Promise<string> => {
-    if (!this.config) {
+    if (!this.store.getters.configured) {
       this.toast.add({
         severity: 'error',
         summary: 'Not configured',
@@ -147,10 +141,11 @@ export class AuthService {
   };
 
   private fullUrl = (path: string) => {
-    const fullTarget = this.config?.host + path;
-    if (this.config?.proxy) {
+    const config = this.store.state.config;
+    const fullTarget = config.host + path;
+    if (config.proxy) {
       // Just append, without any encoding
-      return `${this.config?.proxy}${fullTarget}`;
+      return `${config.proxy}${fullTarget}`;
     }
     return fullTarget;
   };
@@ -184,7 +179,7 @@ export class AuthService {
     // As the request.body stream will be needed by fetch, just assume init.body will do
     const body = init?.body ? ` --data '${init?.body}'` : '';
     // As request.url will include the proxy, re-create the URL here
-    this.lastCurl.value = `curl -v '${this.config?.host + path}' -X ${
+    this.lastCurl.value = `curl -v '${this.store.state.config.host + path}' -X ${
       request.method
     } ${headers.join(' ')}${body}`;
 

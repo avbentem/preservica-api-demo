@@ -5,7 +5,7 @@
     <ConfigInput />
 
     <h2 v-if="!configured">Please complete the form and hit "Save" or "Log in"</h2>
-    <h2 v-if="authorized">Welcome, {{ user.fullName }}</h2>
+    <h2 v-if="user">Welcome, {{ user.fullName }}</h2>
 
     <p>The Preservica APIs needs authorization, even for anonymous access.</p>
     <p>
@@ -45,8 +45,8 @@ import ConfigInput from '@/components/ConfigInput.vue';
 
 export default defineComponent({
   setup() {
-    const { configured, authorized, user } = useAuth();
-    return { configured, authorized, user };
+    const { configured, user } = useAuth();
+    return { configured, user };
   },
   components: { ConfigInput },
 });
