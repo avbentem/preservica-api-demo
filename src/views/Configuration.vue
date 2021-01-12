@@ -9,7 +9,7 @@
 
     <p>The Preservica APIs needs authorization, even for anonymous access.</p>
     <p>
-      When logged in to Preservica SaaS, the session cookie
+      When logged in to Preservica Cloud Edition, the session cookie
       <a href="https://eu.preservica.com/OAI-PMH/?verb=Identify">will be used</a> when accessing the
       APIs in a browser directly. But for most use cases, a successful login on
       <a href="https://developers.preservica.com/api-reference/6-access-token-api"
@@ -24,7 +24,8 @@
     <p>
       A token can also be generated through the externally authenticated acquisition API. This
       allows a trusted external application to acquire Preservica access rights without being
-      authenticated by Preservica. See the documentation linked above.
+      authenticated by Preservica. See the documentation linked above. For Cloud Edition this is
+      only available when using SAML in conjunction with Universal Access.
     </p>
     <p>
       <s
@@ -32,7 +33,7 @@
         <a href="https://eu.preservica.com/api/content/documentation.html"
           >the Swagger UI interface</a
         >
-        (adjust URL to match your SaaS domain).</s
+        (adjust URL to match your Cloud Edition domain).</s
       >
     </p>
   </div>
