@@ -7,6 +7,10 @@
     </p>
     <p>This application runs in your browser.</p>
     <AuthWarning />
+    <p class="affiliation">
+      Preservica&trade; is a trademark of <a href="https://preservica.com/">Preservica Ltd</a>. The
+      creator of this application is not affiliated with that organisation.
+    </p>
   </div>
 </template>
 
@@ -19,3 +23,13 @@ export default defineComponent({
   components: { AuthWarning },
 });
 </script>
+
+<style lang="scss" scoped="true">
+.affiliation {
+  font-size: 0.7rem;
+  &,
+  a {
+    color: gray;
+  }
+}
+</style>

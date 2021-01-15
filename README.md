@@ -77,3 +77,8 @@ changed outside of the IDE.
 
 Beware that Sourcetree may [silently skip](https://jira.atlassian.com/browse/SRCTREE-7184) the
 pre-commit hook.
+
+## Trademark
+
+Preservica™ is a trademark of [Preservica Ltd](https://preservica.com/). The creator of this
+application is not affiliated with that organisation. 
