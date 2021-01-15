@@ -1,4 +1,4 @@
-# Preservica API demo
+# Preservica APIs demo
 
 A basic (work in progress) Vue.js and PrimeVue kitchen sink, showing various usage examples for some
 of [the Preservica APIs](https://developers.preservica.com/api-reference).
@@ -6,21 +6,17 @@ of [the Preservica APIs](https://developers.preservica.com/api-reference).
 :warning:  This is VERY MUCH work in progress.
 
 :warning:  This will need a CORS proxy to access the Preservica APIs from a browser. You can set it
-in the configuration screen when running the demo.
+in the configuration screen when running the demo. When using `yarn serve` or the Docker image,
+enter `/proxy/` in the proxy field in the configuration screen when running this demo.
 
 See it in action on <https://avbentem.github.io/preservica-api-demo>
 
 ## Wish list
 
-- Authorization
-  - Store credentials in local storage (also to allow opening links in new tab/window)
-  - ...but warn if credentials seem to have write access
-  - Router: enforce authorization when applicable
 - Search
   - Fetch possible facets from API
   - Fetch content when clicking result
 - Embedded Swagger UI with auto-refresh access token?
-- Show `curl` commands  
 
 ## Development
 
@@ -67,6 +63,26 @@ rules, added `vue.config.js` to set the app's title, and added PrimeVue, PrimeIc
 - Lint, Prettify and fix files: `yarn lint`
 
   Unlike the pre-commit hook (see below), this is not limited to staged files.
+
+### Docker
+
+The [Dockerfile](./Dockerfile) creates a temporary (partially cached) build image, builds the
+project, and creates a final image that serves the static result using Nginx. To avoid CORS issues,
+this also [proxies](./docker-nginx.conf) requests for `/proxy/https://eu.preservica.com/api/a/b/c`
+to `https://eu.preservica.com/api/a/b/c`. To use that, enter `/proxy/` in the proxy field in the
+configuration screen when running the demo.
+
+To build and tag:
+
+```text
+docker build -t preservica-api-demo .
+```
+
+To run on <http://localhost:9000>:
+
+```text
+docker run -it -p 9000:80 --rm preservica-api-demo
+```
 
 ### Linting and Prettier
 
