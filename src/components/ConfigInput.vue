@@ -10,8 +10,11 @@
           This demo runs in your browser, but the Preservica APIs do not support
           <a href="https://developer.mozilla.org/docs/Web/HTTP/CORS">CORS</a>. A proxy server can
           add CORS headers to use a browser on a different domain. The full API URL will be appended
-          without any encoding.
-          <strong>A third-party proxy may log your credentials.</strong>
+          without any encoding. <strong>A third-party proxy may log your credentials.</strong> To
+          avoid that, you can
+          <a href="https://github.com/avbentem/preservica-api-demo#development"
+            >run this project locally</a
+          >.
         </small>
       </div>
       <div class="p-field p-col-12">
