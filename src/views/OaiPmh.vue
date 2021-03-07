@@ -108,7 +108,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { useToast } from 'primevue/components/toast/useToast';
+import { useToast } from 'primevue/usetoast';
 import { parseStringPromise } from 'xml2js';
 import format from 'xml-formatter';
 import AuthWarning from '@/components/AuthWarning.vue';

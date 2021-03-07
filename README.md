@@ -20,7 +20,7 @@ See it in action on <https://avbentem.github.io/preservica-api-demo>
 
 ## Development
 
-This uses Vue 3 preview, PrimeVue, PrimeIcons and PrimeFlex with TypeScript.
+This uses Vue 3, PrimeVue, PrimeIcons and PrimeFlex with TypeScript.
 
 <details>
 <summary>Details</summary>

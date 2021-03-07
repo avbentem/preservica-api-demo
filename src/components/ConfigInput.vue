@@ -69,7 +69,7 @@
 <script lang="ts">
 import { defineComponent, ref, watchEffect } from 'vue';
 import { useStore } from 'vuex';
-import { useToast } from 'primevue/components/toast/useToast';
+import { useToast } from 'primevue/usetoast';
 import { isEqual } from 'lodash-es';
 import { AppState, Config } from '@/store';
 import { useAuth } from '@/plugins/Auth';

@@ -12,10 +12,7 @@
  * @see https://developers.preservica.com/api-reference/6-access-token-api
  */
 
-// TODO Module not found: Error: [CaseSensitivePathsPlugin] `[..]/node_modules/primevue/useToast.js`
-// does not match the corresponding path on disk `usetoast.js`.
-// See https://github.com/primefaces/primevue/issues/813
-import { useToast } from 'primevue/components/toast/useToast';
+import { useToast } from 'primevue/usetoast';
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { AppState } from '@/store';
