@@ -24,7 +24,7 @@
         <!-- value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref -->
         <DataTable
           :value="fields.value"
-          autoLayout="true"
+          :autoLayout="true"
           sortMode="multiple"
           :multiSortMeta="multiSortMeta"
           :filters="filters"
@@ -71,7 +71,7 @@
                 v-model="filters['facetable']"
                 :options="[true, false]"
                 placeholder="All"
-                showClear="true"
+                :showClear="true"
               />
             </template>
           </Column>
