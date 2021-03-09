@@ -125,10 +125,27 @@
     </div>
   </div>
 
-  <div v-if="resultJson">
-    <Accordion>
+  <div v-if="result">
+    <!-- value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref -->
+    <h2>Showing {{ result.value.objectIds?.length }} of {{ result.value.totalHits }} results</h2>
+    <Accordion :activeIndex="0">
+      <AccordionTab header="Table">
+        <DataTable :value="tableResults" :autoLayout="true" responsiveLayout="scroll">
+          <Column
+            v-for="col of tableColumns"
+            :field="col.field"
+            :header="col.header"
+            :key="col.field"
+          >
+            <template #body="slotProps">
+              {{ slotProps.data[col.field] }}
+            </template>
+          </Column>
+        </DataTable>
+      </AccordionTab>
+
       <AccordionTab header="JSON">
-        <div class="json">{{ resultJson }}</div>
+        <div class="json">{{ result }}</div>
       </AccordionTab>
     </Accordion>
   </div>
@@ -141,9 +158,23 @@ import AuthWarning from '@/components/AuthWarning.vue';
 import { useAuth } from '@/plugins/Auth';
 import { IndexedField } from '@/views/Indexes.vue';
 
-export interface FieldValues {
+interface FieldValues {
   name: string;
   values?: string[];
+}
+
+interface ResultMetadata {
+  name: string;
+  value: unknown;
+}
+
+interface TableRow {
+  [index: string]: unknown;
+}
+
+interface TableColumn {
+  field: string;
+  header: string;
 }
 
 export default defineComponent({
@@ -163,7 +194,7 @@ export default defineComponent({
     ]);
 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    const resultJson = ref<{ [index: string]: any } | undefined>(undefined);
+    const result = ref<{ [index: string]: any } | undefined>(undefined);
     /* eslint-enable  @typescript-eslint/no-explicit-any */
     const start = ref(0);
     const max = ref(10);
@@ -220,7 +251,7 @@ export default defineComponent({
 
     const search = async () => {
       // TODO add some loading indicator/button spinner
-      resultJson.value = undefined;
+      result.value = undefined;
 
       // TODO percent-encode and create some helper
       const body = `q=${JSON.stringify(query.value)}&start=${start.value}&max=${
@@ -234,7 +265,7 @@ export default defineComponent({
         },
         body,
       });
-      resultJson.value = await res.json();
+      result.value = await res.json();
     };
 
     // TODO (re-)load once (re-)configured
@@ -261,7 +292,7 @@ export default defineComponent({
       max,
       metadata,
       search,
-      resultJson,
+      result,
     };
   },
 
@@ -345,6 +376,60 @@ export default defineComponent({
       set(values: FieldValues[]) {
         this.query.fields = values;
       },
+    },
+    /**
+     * Map
+     *
+     * ```json
+     * "metadata": [
+     *   [
+     *     {
+     *        "name": "xip.created",
+     *        "value": 1615031390000
+     *     },
+     *     {
+     *        "name": "xip.title",
+     *        "value": "some title"
+     *     },
+     *     {
+     *        "name": "xip.document_type",
+     *        "value": "IO"
+     *     },
+     *     ...
+     *   ],
+     *   ...
+     * ]
+     * ```
+     * ...to:
+     *
+     * ```json
+     * [
+     *   {
+     *     "xip.created": 1615031390000,
+     *     "xip.title": "some title",
+     *     ...
+     *   },
+     *   ...
+     * ]
+     * ```
+     */
+    tableResults(): TableRow[] {
+      return this.result?.value.metadata.map((row: ResultMetadata[]) => {
+        return row.reduce((acc: TableRow, curr: ResultMetadata) => {
+          acc[curr.name] = curr.value;
+          return acc;
+        }, {});
+      });
+    },
+    tableColumns(): TableColumn[] {
+      // TODO Can we trust the first result in the metadata?
+      return this.result?.value.metadata[0]?.reduce((acc: TableColumn[], curr: ResultMetadata) => {
+        acc.push({
+          field: curr.name,
+          header: this.fields?.find((f) => f.shortKey === curr.name)?.displayName || curr.name,
+        });
+        return acc;
+      }, []);
     },
   },
 });
