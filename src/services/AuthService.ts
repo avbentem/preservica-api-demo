@@ -64,11 +64,11 @@ export class AuthService {
    * We could automate this by watching the store's state, but we'd still want to reset this when
    * commencing a login that may actually fail.
    */
-  clearAuth = () => {
+  clearAuth = (): void => {
     this.user.value = undefined;
   };
 
-  login = async () => {
+  login = async (): Promise<void> => {
     this.clearAuth();
 
     const config = this.store.state.config;

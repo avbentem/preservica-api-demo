@@ -1,5 +1,5 @@
 <template>
-  <div class="indexes intro">
+  <div class="indexes intro p-mb-6">
     <h1>Indexed fields</h1>
     <p>
       The
@@ -15,8 +15,6 @@
       label="Get indexed fields"
     />
   </div>
-
-  <br />
 
   <div v-if="fields">
     <Accordion :activeIndex="0">
@@ -104,19 +102,21 @@ import { useAuth } from '@/plugins/Auth';
  * }
  * ```
  */
-interface IndexedFieldsValue {
+export interface IndexedField {
+  // Schema Short Name in a Custom Index Definition document
   shortName: string;
   uri: string;
   index: string;
+  shortKey: string;
   displayName: string;
   type: string;
   facetable: boolean;
 }
 
-interface IndexedFieldsResponse {
+export interface IndexedFieldsResponse {
   success: boolean;
   version: number;
-  value: IndexedFieldsValue[];
+  value: IndexedField[];
 }
 
 export default defineComponent({
