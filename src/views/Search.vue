@@ -13,10 +13,10 @@
         </p>
       </TabPanel>
 
-      <TabPanel header="Fields">
+      <TabPanel header="Metadata">
         <p class="intro p-mb-6">
-          Select the fields to include in the results. All selected fields will also be available as
-          filters.
+          Select the metadata to include in the results. The very same items will also be configured
+          as filters, but you can manually overrule that in the Request tab.
         </p>
         <DataTable
           v-if="fields"
@@ -27,6 +27,7 @@
           sortMode="multiple"
           :multiSortMeta="multiSortMeta"
           :filters="filters"
+          class="p-datatable-sm"
         >
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
@@ -55,8 +56,9 @@
 
       <TabPanel header="Request">
         <p class="intro p-mb-6">
-          This is the request that will be sent to the API. You can edit this manually, and it will
-          also be updated when making changes in the other tabs and input fields.
+          This is the request that will be sent to the API. You can edit this manually, but it will
+          also be updated when making changes in the other tabs and input fields. Making changes on
+          the Metadata tab will override both <code>metadata</code> and <code>query.fields</code>.
         </p>
         <div>
           <div class="p-fluid p-formgrid p-grid p-text-left">
@@ -70,7 +72,7 @@
               <Textarea
                 id="query"
                 v-model="queryJson"
-                rows="30"
+                rows="20"
                 :autoResize="false"
                 spellcheck="false"
               />
@@ -196,6 +198,7 @@ export default defineComponent({
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     const result = ref<{ [index: string]: any } | undefined>(undefined);
     /* eslint-enable  @typescript-eslint/no-explicit-any */
+    const tableColumns = ref<TableColumn[]>([]);
     const start = ref(0);
     const max = ref(10);
 
@@ -247,7 +250,7 @@ export default defineComponent({
       ],
     });
 
-    const metadata = ref('xip.created,xip.title,xip.document_type,xip.format_group_r_Display');
+    const metadata = ref(query.value.fields.map((field) => field.name).join());
 
     const search = async () => {
       // TODO add some loading indicator/button spinner
@@ -266,6 +269,12 @@ export default defineComponent({
         body,
       });
       result.value = await res.json();
+
+      // Ensure changes in the metadata do not affect the search results currently displayed
+      tableColumns.value = metadata.value?.split(',').map((col) => ({
+        field: col,
+        header: fields.value?.find((f: IndexedField) => f.shortKey === col)?.displayName || col,
+      }));
     };
 
     // TODO (re-)load once (re-)configured
@@ -293,17 +302,17 @@ export default defineComponent({
       metadata,
       search,
       result,
+      tableColumns,
     };
   },
 
   watch: {
     selectedFields(selected: IndexedField[]) {
-      console.log('watch selectedField');
       this.query.fields = selected.map((field) => ({
         name: field.shortKey,
         values: this.query.fields.find((f) => f.name === field.shortKey)?.values || [],
       }));
-      // TODO separate metadata and filters
+      // Regardless if the items in `query.fields` and `metadata` were the same
       this.metadata = this.query.fields.map((field) => field.name).join();
     },
     query(value) {
@@ -315,9 +324,7 @@ export default defineComponent({
      * Update other tabs when changing the view. This is only useful to process some parts of the
      * JSON version of the request, which is likely to be invalid while typing.
      */
-    onTabChange(event: { originalEvent: Event; index: number }) {
-      // TODO document if this triggers watcher
-      console.log('tab change', event);
+    onTabChange(/* event: { originalEvent: Event; index: number } */) {
       if (!this.fields || !this.query) {
         // In case tabs are changed before the list of fields has been fetched
         return;
@@ -338,6 +345,7 @@ export default defineComponent({
         }
         newSelectedFields.push(f);
       }
+      // This will trigger the watcher
       this.selectedFields = newSelectedFields;
     },
     filterName(field: FieldValues): string {
@@ -420,16 +428,6 @@ export default defineComponent({
           return acc;
         }, {});
       });
-    },
-    tableColumns(): TableColumn[] {
-      // TODO Can we trust the first result in the metadata?
-      return this.result?.value.metadata[0]?.reduce((acc: TableColumn[], curr: ResultMetadata) => {
-        acc.push({
-          field: curr.name,
-          header: this.fields?.find((f) => f.shortKey === curr.name)?.displayName || curr.name,
-        });
-        return acc;
-      }, []);
     },
   },
 });
