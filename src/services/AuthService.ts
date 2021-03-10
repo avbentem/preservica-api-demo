@@ -164,7 +164,7 @@ export class AuthService {
     return fullTarget;
   };
 
-  private fetchWithDefaults = async (
+  fetchWithDefaults = async (
     path: string,
     init?: RequestInit,
     token?: string,
@@ -176,7 +176,7 @@ export class AuthService {
       },
     };
 
-    const request = new Request(this.fullUrl(path), {
+    const request = new Request(path.startsWith('http') ? path : this.fullUrl(path), {
       ...defaults,
       ...init,
       headers: {
