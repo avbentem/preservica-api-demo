@@ -29,28 +29,37 @@
           :filters="filters"
           class="p-datatable-sm"
         >
+          <template #header>
+            <div class="p-d-flex p-jc-end">
+              <span class="p-input-icon-left">
+                <i class="pi pi-search" />
+                <InputText
+                  v-model="filters['global'].value"
+                  placeholder="all-column search"
+                  size="50"
+                />
+              </span>
+            </div>
+          </template>
+
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
           <Column
             field="shortName"
             header="source"
             :sortable="true"
-            filterMatchMode="contains"
             headerClass="p-text-center"
             bodyClass="p-text-center"
           >
           </Column>
 
-          <Column field="displayName" header="name" :sortable="true" filterMatchMode="contains">
-          </Column>
+          <Column field="displayName" header="name" :sortable="true"> </Column>
 
-          <Column field="shortKey" header="key" :sortable="true" filterMatchMode="contains">
-          </Column>
+          <Column field="shortKey" header="key" :sortable="true"> </Column>
 
-          <Column field="type" header="type" :sortable="true" filterMatchMode="in"></Column>
+          <Column field="type" header="type" :sortable="true"></Column>
 
-          <Column field="facetable" header="facet" :sortable="true" filterMatchMode="equals">
-          </Column>
+          <Column field="facetable" header="facet" :sortable="true"> </Column>
         </DataTable>
       </TabPanel>
 
@@ -155,6 +164,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { FilterMatchMode } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
 import { useAuth } from '@/plugins/Auth';
@@ -188,7 +198,9 @@ export default defineComponent({
     const selectedFields = ref<IndexedField[] | undefined>([]);
     const shortNames = ref<string[]>([]);
     const types = ref<string[]>([]);
-    const filters = ref({});
+    const filters = ref({
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
     const multiSortMeta = ref([
       // XIP on top
       { field: 'shortName', order: -1 },
