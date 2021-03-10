@@ -94,8 +94,36 @@
   </div>
 
   <!-- TODO form for browser auto-complete -->
-  <div v-if="configured" class="p-mx-lg-6 p-mx-md-2 p-mx-sm-0">
-    <br />
+  <div v-if="configured" class="p-mt-2 p-mx-lg-6 p-mx-md-2 p-mx-sm-0">
+    <div class="p-fluid p-formgrid p-grid p-text-left">
+      <div class="p-field p-col-12 p-lg-4 p-md-6">
+        <label for="searchType">API</label>
+        <Dropdown
+          id="searchType"
+          v-model="searchType"
+          :options="searchTypes"
+          optionLabel="name"
+          optionValue="code"
+          placeholder="Select an API"
+        />
+      </div>
+      <div v-if="searchType === 'search-within'" class="p-field p-col-12 p-lg-8 p-md-6">
+        <label for="parent-hierarchy">Parent hierarchy (ref of folder to search within)</label>
+        <InputText id="parent-hierarchy" v-model="parent" />
+      </div>
+      <div v-if="searchType === 'object-children'" class="p-field p-col-12 p-lg-8 p-md-6">
+        <!-- TODO this also allows for `includevirtual` -->
+        <label for="cmis-id"
+          >CMIS id, starting with <code>sdb:SO|</code> or <code>sdb:IO|</code></label
+        >
+        <InputText
+          id="cmis-id"
+          v-model="parent"
+          placeholder="e.g. sdb:IO|74b6bd3a-a294-499f-80aa-433826718013"
+        />
+      </div>
+    </div>
+
     <div class="p-fluid p-formgrid p-grid p-text-left">
       <div
         v-for="(field, c1) in filtersAndValues"
@@ -235,6 +263,14 @@ interface TableColumn {
   header: string;
 }
 
+type SearchType = 'search' | 'search-within' | 'top-level-list' | 'object-children';
+export const searchTypes: { name: string; code: SearchType }[] = [
+  { name: 'Search', code: 'search' },
+  { name: 'Search within', code: 'search-within' },
+  { name: 'Top-level list', code: 'top-level-list' },
+  { name: 'Object children', code: 'object-children' },
+];
+
 export default defineComponent({
   components: { AuthWarning, DocumentRenderer, Thumbnail },
   setup() {
@@ -242,6 +278,7 @@ export default defineComponent({
     const toast = useToast();
     const fields = ref<IndexedField[] | undefined>(undefined);
     const selectedFields = ref<IndexedField[] | undefined>([]);
+    // TODO remove unless we add some dropdowns?
     const shortNames = ref<string[]>([]);
     const types = ref<string[]>([]);
     const filters = ref({
@@ -262,6 +299,8 @@ export default defineComponent({
     const resultMax = ref(0);
     const start = ref(0);
     const max = ref(10);
+    const searchType = ref<SearchType>('search');
+    const parent = ref<string | undefined>();
 
     // https://usergroup.preservica.com/documentation/ce/6.2.1/html/GuideToUniversalAccess.html
     // Each date interval has three parameters.
@@ -318,12 +357,19 @@ export default defineComponent({
       result.value = undefined;
       tableExpandedRows.value = [];
 
-      // TODO percent-encode and create some helper
+      const encodedParent = encodeURIComponent(parent.value || '');
+      const paramSearchWithin =
+        searchType.value === 'search-within' ? `&parenthierarchy=${encodedParent}` : '';
+      const paramObjectChildren =
+        searchType.value === 'object-children' ? `&id=${encodedParent}` : '';
+
+      // TODO Given that the API wants application/x-www-form-urlencoded we should encode the JSON too,
+      // but that's horrible for the curl examples and the server seems lenient?
       const body = `q=${JSON.stringify(query.value)}&start=${start.value}&max=${
         max.value
-      }&metadata=${metadata.value}`;
+      }&metadata=${encodeURIComponent(metadata.value)}${paramSearchWithin}${paramObjectChildren}`;
 
-      const res = await fetchWithToken('api/content/search', {
+      const res = await fetchWithToken(`api/content/${searchType.value}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -369,6 +415,9 @@ export default defineComponent({
       start,
       max,
       metadata,
+      searchType,
+      searchTypes,
+      parent,
       search,
       onPaginatorChange,
       result,
