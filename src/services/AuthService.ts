@@ -37,6 +37,11 @@ export interface AuthenticatedUser {
   validUntil: number;
 }
 
+interface CurlCommand {
+  timestamp: string;
+  command: string;
+}
+
 export class AuthService {
   private store = useStore<AppState>();
   private toast = useToast();
@@ -49,14 +54,14 @@ export class AuthService {
   configured = computed<boolean>(() => this.store.getters.configured);
 
   /**
-   * The curl-alternative of the last executed API call. Any embedded token will not be refreshed,
+   * The curl-alternatives of the last executed API calls. Any embedded token will not be refreshed,
    * so may no longer be valid at the time the curl command is copied.
    *
    * This is not at all the same as the browser's fetch call; many headers such as `Origin`,
    * `Referer`, `Accept-Encoding` and `Accept-Language` and  are not included, and curl will add
    * `Host`, `User-Agent` and `Content-Length`.
    */
-  lastCurl = ref('');
+  lastCurls = ref<CurlCommand[]>([]);
 
   /**
    * Clear the current user details, forcing a new login.
@@ -188,6 +193,8 @@ export class AuthService {
       },
     });
 
+    // Keep at most 25 curl commands (including the newly added one)
+    this.lastCurls.value = this.lastCurls.value.slice(0, 24);
     const headers: string[] = [];
     for (const [name, value] of request.headers.entries()) {
       headers.push(`-H '${name}: ${value}'`);
@@ -195,10 +202,12 @@ export class AuthService {
     // As the request.body stream will be needed by fetch, just assume init.body will do
     const body = init?.body ? ` --data '${init?.body}'` : '';
     // As request.url will include the proxy, re-create the URL here
-    // TODO save list of commands, as search will also make requests for thumbnails
-    this.lastCurl.value = `curl -v '${this.store.state.config.host + path}' -X ${
-      request.method
-    } ${headers.join(' ')}${body}`;
+    this.lastCurls.value.unshift({
+      timestamp: new Date().toISOString(),
+      command: `curl -v '${this.fullUrl(path, false)}' -X ${request.method} ${headers.join(
+        ' '
+      )}${body}`,
+    });
 
     const res = await fetch(request).catch((reason) => {
       // For security reasons, specifics about what went wrong with a CORS request are not available
