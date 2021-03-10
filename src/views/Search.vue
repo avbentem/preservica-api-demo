@@ -221,6 +221,7 @@
           </Column>
 
           <template #expansion="slotProps">
+            <small>{{ slotProps.data.objectId }}</small>
             <DocumentRenderer :object-id="slotProps.data.objectId" />
           </template>
         </DataTable>
