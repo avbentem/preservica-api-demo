@@ -118,17 +118,17 @@
       </div>
     </div>
     <div class="p-fluid p-formgrid p-grid p-text-left">
-      <div class="p-field p-col-12 p-lg-8 p-md-6">
+      <div class="p-field p-col-12 p-lg-6 p-md-6">
         <label for="q">Search text</label>
         <InputText id="q" v-model="q" />
       </div>
-      <div class="p-field p-col-6 p-lg-1 p-md-2">
+      <div class="p-field p-col-6 p-lg-2 p-md-2">
         <label for="start">Start</label>
-        <InputNumber id="start" v-model="start" :min="0" showButtons />
+        <InputNumber id="start" v-model="start" :min="0" showButtons locale="en-US" />
       </div>
-      <div class="p-field p-col-6 p-lg-1 p-md-2">
-        <label for="max">Limit</label>
-        <InputNumber id="max" v-model="max" :min="0" showButtons />
+      <div class="p-field p-col-6 p-lg-2 p-md-2">
+        <label for="max">Max</label>
+        <InputNumber id="max" v-model="max" :min="0" showButtons locale="en-US" />
       </div>
       <div class="p-field p-col-12 p-lg-2 p-md-2 p-as-end">
         <Button icon="pi pi-search" @click="search" label="Search" />
@@ -138,7 +138,19 @@
 
   <div v-if="result">
     <!-- value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref -->
-    <h2>Showing {{ result.value.objectIds?.length }} of {{ result.value.totalHits }} results</h2>
+    <h2 v-if="result.value.objectIds?.length === 0">No results</h2>
+    <h2 v-else>
+      Results {{ (resultStart + 1).toLocaleString('en') }}&ndash;{{
+        (resultStart + result.value.objectIds?.length).toLocaleString('en')
+      }}
+      of {{ result.value.totalHits.toLocaleString('en') }}
+    </h2>
+    <Paginator
+      :first="resultStart"
+      :rows="resultMax"
+      :totalRecords="result.value.totalHits"
+      @page="onPaginatorChange($event)"
+    ></Paginator>
     <Accordion :activeIndex="0">
       <AccordionTab header="Table">
         <DataTable
@@ -196,6 +208,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { FilterMatchMode } from 'primevue/api';
+import { PageState } from 'primevue/paginator';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
 import DocumentRenderer from '@/components/DocumentRenderer.vue';
@@ -245,6 +258,8 @@ export default defineComponent({
     /* eslint-enable  @typescript-eslint/no-explicit-any */
     const tableColumns = ref<TableColumn[]>([]);
     const tableExpandedRows = ref([]);
+    const resultStart = ref(0);
+    const resultMax = ref(0);
     const start = ref(0);
     const max = ref(10);
 
@@ -301,6 +316,7 @@ export default defineComponent({
     const search = async () => {
       // TODO add some loading indicator/button spinner
       result.value = undefined;
+      tableExpandedRows.value = [];
 
       // TODO percent-encode and create some helper
       const body = `q=${JSON.stringify(query.value)}&start=${start.value}&max=${
@@ -321,6 +337,13 @@ export default defineComponent({
         field: col,
         header: fields.value?.find((f: IndexedField) => f.shortKey === col)?.displayName || col,
       }));
+      resultStart.value = start.value;
+      resultMax.value = max.value;
+    };
+
+    const onPaginatorChange = (event: PageState) => {
+      start.value = event.page * max.value;
+      return search();
     };
 
     // TODO (re-)load once (re-)configured
@@ -347,7 +370,10 @@ export default defineComponent({
       max,
       metadata,
       search,
+      onPaginatorChange,
       result,
+      resultStart,
+      resultMax,
       tableColumns,
       tableExpandedRows,
     };
