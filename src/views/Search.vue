@@ -160,6 +160,16 @@
           </Column>
 
           <Column
+            header="Highlight"
+            headerClass="p-text-center"
+            bodyClass="p-text-center highlight"
+          >
+            <template #body="slotProps">
+              <div v-html="slotProps.data.highlighting" />
+            </template>
+          </Column>
+
+          <Column
             v-for="col of tableColumns"
             :field="col.field"
             :header="col.header"
@@ -441,7 +451,13 @@ export default defineComponent({
      *       ...
      *     ],
      *     ...
-     *   ]
+     *   ],
+     *   "highlighting": {
+     *     "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2": [
+     *       ", inclusief de aan te brengen verbreding is weergegeven op de <em>tekening</em> \nin de bijlage bij deze aanvraag"
+     *     ],
+     *     ...
+     *   ],
      * ]
      * ```
      *
@@ -460,14 +476,22 @@ export default defineComponent({
      * ```
      */
     tableResults(): TableRow[] {
-      const rows = this.result?.value.metadata.map((row: ResultMetadata[]) => {
+      if (!this.result?.value) {
+        return [];
+      }
+      // `value` is not some Vue.js Ref but part of the Preservica JSON response
+      const results = this.result.value;
+      const rows = results.metadata.map((row: ResultMetadata[]) => {
         return row.reduce((acc: TableRow, curr: ResultMetadata) => {
           acc[curr.name] = curr.value;
           return acc;
         }, {});
       });
       return rows.map((row: TableRow, index: number) => {
-        row['objectId'] = this.result?.value.objectIds[index];
+        const objectId = results.objectIds[index];
+        row['objectId'] = objectId;
+        // This is an array
+        row['highlighting'] = results.highlighting[objectId];
         return row;
       });
     },
@@ -482,6 +506,12 @@ textarea {
 
 .remove-filter {
   cursor: pointer;
+}
+
+::v-deep(.highlight) {
+  em {
+    background-color: khaki;
+  }
 }
 
 ::v-deep(.p-tabview-nav) {
