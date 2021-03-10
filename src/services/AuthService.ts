@@ -143,20 +143,18 @@ export class AuthService {
   };
 
   /**
-   * Return a full URL with the placeholder `{token}` replaced with a valid token.
+   * Return the given `path` with the placeholder `{token}` replaced with a valid token.
    *
    * @param path a relative path such as `Render/render/external?entity=IO&entityRef=...&token={token}`
-   * @param useProxy whether or not the proxy should be used, if configured
    */
-  fullUrlWithToken = async (path: string, useProxy = true): Promise<string> => {
+  pathWithToken = async (path: string): Promise<string> => {
     const token = await this.getToken();
-    const url = this.fullUrl(path, useProxy);
-    return url.replace('{token}', token);
+    return path.replace('{token}', token);
   };
 
-  private fullUrl = (path: string, useProxy = true) => {
+  fullUrl = (path: string, useProxy = true) => {
     const config = this.store.state.config;
-    const fullTarget = config.host + path;
+    const fullTarget = path.startsWith('http') ? path : config.host + path;
     if (useProxy && config.proxy) {
       // Just append, without any encoding
       return `${config.proxy}${fullTarget}`;
@@ -164,6 +162,9 @@ export class AuthService {
     return fullTarget;
   };
 
+  /**
+   * Make a HTTP request, expanding the `path` to use the configured API host and proxy.
+   */
   fetchWithDefaults = async (
     path: string,
     init?: RequestInit,
@@ -176,7 +177,7 @@ export class AuthService {
       },
     };
 
-    const request = new Request(path.startsWith('http') ? path : this.fullUrl(path), {
+    const request = new Request(this.fullUrl(path), {
       ...defaults,
       ...init,
       headers: {
