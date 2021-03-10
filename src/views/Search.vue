@@ -149,6 +149,17 @@
         >
           <Column :expander="true" headerStyle="width: 1rem" bodyStyle="padding: 0" />
           <Column
+            header="Preview"
+            headerClass="p-text-center"
+            bodyClass="p-text-center"
+            :style="{ width: '100px' }"
+          >
+            <template #body="slotProps">
+              <Thumbnail :object-id="slotProps.data.objectId" />
+            </template>
+          </Column>
+
+          <Column
             v-for="col of tableColumns"
             :field="col.field"
             :header="col.header"
@@ -178,6 +189,7 @@ import { FilterMatchMode } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
 import DocumentRenderer from '@/components/DocumentRenderer.vue';
+import Thumbnail from '@/components/Thumbnail.vue';
 import { useAuth } from '@/plugins/Auth';
 import { IndexedField } from '@/views/Indexes.vue';
 
@@ -201,7 +213,7 @@ interface TableColumn {
 }
 
 export default defineComponent({
-  components: { AuthWarning, DocumentRenderer },
+  components: { AuthWarning, DocumentRenderer, Thumbnail },
   setup() {
     const { configured, fetchWithToken } = useAuth();
     const toast = useToast();

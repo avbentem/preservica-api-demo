@@ -131,10 +131,15 @@ export class AuthService {
    *
    * @param path the path to fetch (a full RequestInfo is not supported here)
    * @param init as in regular invocation of fetch
+   * @param acceptableErrorCodes optional list of HTTP codes to ignore, like 404
    */
-  fetchWithToken = async (path: string, init?: RequestInit): Promise<Response> => {
+  fetchWithToken = async (
+    path: string,
+    init?: RequestInit,
+    acceptableErrorCodes: number[] = []
+  ): Promise<Response> => {
     const token = await this.getToken();
-    return this.fetchWithDefaults(path, init, token);
+    return this.fetchWithDefaults(path, init, token, acceptableErrorCodes);
   };
 
   /**
@@ -162,7 +167,8 @@ export class AuthService {
   private fetchWithDefaults = async (
     path: string,
     init?: RequestInit,
-    token?: string
+    token?: string,
+    acceptableErrorCodes: number[] = []
   ): Promise<Response> => {
     const defaults = {
       headers: {
@@ -188,6 +194,7 @@ export class AuthService {
     // As the request.body stream will be needed by fetch, just assume init.body will do
     const body = init?.body ? ` --data '${init?.body}'` : '';
     // As request.url will include the proxy, re-create the URL here
+    // TODO save list of commands, as search will also make requests for thumbnails
     this.lastCurl.value = `curl -v '${this.store.state.config.host + path}' -X ${
       request.method
     } ${headers.join(' ')}${body}`;
@@ -204,7 +211,7 @@ export class AuthService {
       throw new Error('Failed to connect to proxy or Preservica server');
     });
 
-    if (!res.ok) {
+    if (!res.ok && !acceptableErrorCodes.includes(res.status)) {
       this.toast.add({
         severity: 'error',
         // HTTP/2 connections do not support res.statusText
