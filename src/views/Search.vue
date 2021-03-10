@@ -141,7 +141,13 @@
     <h2>Showing {{ result.value.objectIds?.length }} of {{ result.value.totalHits }} results</h2>
     <Accordion :activeIndex="0">
       <AccordionTab header="Table">
-        <DataTable :value="tableResults" :autoLayout="true" responsiveLayout="scroll">
+        <DataTable
+          :value="tableResults"
+          :autoLayout="true"
+          responsiveLayout="scroll"
+          v-model:expandedRows="tableExpandedRows"
+        >
+          <Column :expander="true" headerStyle="width: 1rem" bodyStyle="padding: 0" />
           <Column
             v-for="col of tableColumns"
             :field="col.field"
@@ -152,6 +158,10 @@
               {{ slotProps.data[col.field] }}
             </template>
           </Column>
+
+          <template #expansion="slotProps">
+            <DocumentRenderer :object-id="slotProps.data.objectId" />
+          </template>
         </DataTable>
       </AccordionTab>
 
@@ -167,6 +177,7 @@ import { defineComponent, ref } from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
+import DocumentRenderer from '@/components/DocumentRenderer.vue';
 import { useAuth } from '@/plugins/Auth';
 import { IndexedField } from '@/views/Indexes.vue';
 
@@ -190,7 +201,7 @@ interface TableColumn {
 }
 
 export default defineComponent({
-  components: { AuthWarning },
+  components: { AuthWarning, DocumentRenderer },
   setup() {
     const { configured, fetchWithToken } = useAuth();
     const toast = useToast();
@@ -211,6 +222,7 @@ export default defineComponent({
     const result = ref<{ [index: string]: any } | undefined>(undefined);
     /* eslint-enable  @typescript-eslint/no-explicit-any */
     const tableColumns = ref<TableColumn[]>([]);
+    const tableExpandedRows = ref([]);
     const start = ref(0);
     const max = ref(10);
 
@@ -315,6 +327,7 @@ export default defineComponent({
       search,
       result,
       tableColumns,
+      tableExpandedRows,
     };
   },
 
@@ -364,7 +377,6 @@ export default defineComponent({
       return this.fields?.find((f) => f.shortKey === field.name)?.displayName || field.name;
     },
     addFilter(field: FieldValues) {
-      console.log('addfilter', field.name);
       field.values?.push('');
     },
     removeFilter(field: FieldValues, index: number) {
@@ -398,33 +410,35 @@ export default defineComponent({
       },
     },
     /**
-     * Map
+     * Map a Preservica search result like:
      *
      * ```json
-     * "metadata": [
-     *   [
-     *     {
-     *        "name": "xip.created",
-     *        "value": 1615031390000
-     *     },
-     *     {
-     *        "name": "xip.title",
-     *        "value": "some title"
-     *     },
-     *     {
-     *        "name": "xip.document_type",
-     *        "value": "IO"
-     *     },
+     * {
+     *   "objectIds": [
+     *     "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2",
      *     ...
      *   ],
-     *   ...
+     *   ...,
+     *   "metadata": [
+     *     [
+     *       { "name": "xip.created", "value": 1615031390000 },
+     *       { "name": "xip.title", "value": "some title" },
+     *       ...
+     *     ],
+     *     [
+     *       ...
+     *     ],
+     *     ...
+     *   ]
      * ]
      * ```
+     *
      * ...to:
      *
      * ```json
      * [
      *   {
+     *     "objectId": "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2",
      *     "xip.created": 1615031390000,
      *     "xip.title": "some title",
      *     ...
@@ -434,11 +448,15 @@ export default defineComponent({
      * ```
      */
     tableResults(): TableRow[] {
-      return this.result?.value.metadata.map((row: ResultMetadata[]) => {
+      const rows = this.result?.value.metadata.map((row: ResultMetadata[]) => {
         return row.reduce((acc: TableRow, curr: ResultMetadata) => {
           acc[curr.name] = curr.value;
           return acc;
         }, {});
+      });
+      return rows.map((row: TableRow, index: number) => {
+        row['objectId'] = this.result?.value.objectIds[index];
+        return row;
       });
     },
   },
