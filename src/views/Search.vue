@@ -230,7 +230,10 @@
           </Column>
 
           <template #expansion="slotProps">
-            <small>{{ slotProps.data.objectId }}</small>
+            <div class="p-mb-2">
+              <DownloadButton :object-id="slotProps.data.objectId" />
+              <p>{{ slotProps.data.objectId }}</p>
+            </div>
             <DocumentRenderer :object-id="slotProps.data.objectId" />
           </template>
         </DataTable>
@@ -250,6 +253,7 @@ import { PageState } from 'primevue/paginator';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
 import DocumentRenderer from '@/components/DocumentRenderer.vue';
+import DownloadButton from '@/components/DownloadButton.vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import { useAuth } from '@/plugins/Auth';
 import { IndexedField } from '@/views/Indexes.vue';
@@ -282,7 +286,7 @@ export const searchTypes: { name: string; code: SearchType }[] = [
 ];
 
 export default defineComponent({
-  components: { AuthWarning, DocumentRenderer, Thumbnail },
+  components: { AuthWarning, DocumentRenderer, DownloadButton, Thumbnail },
   setup() {
     const { configured, fetchWithToken } = useAuth();
     const toast = useToast();
