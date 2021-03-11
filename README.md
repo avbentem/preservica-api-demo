@@ -5,18 +5,32 @@ of [the Preservica APIs](https://developers.preservica.com/api-reference).
 
 :warning:  This is VERY MUCH work in progress.
 
-:warning:  This will need a CORS proxy to access the Preservica APIs from a browser. You can set it
-in the configuration screen when running the demo. When using `yarn serve` or the Docker image,
-enter `/proxy/` in the proxy field in the configuration screen when running this demo.
-
 See it in action on <https://avbentem.github.io/preservica-api-demo>
 
-## Wish list
+## Cross-origin requests (CORS)
 
-- Search
-  - Fetch possible facets from API
-  - Fetch content when clicking result
-- Embedded Swagger UI with auto-refresh access token?
+The Preservica APIs are typically used from an intermediate backend server, not directly from a
+browser. Preservica does not allow [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) to
+support using the APIs from a browser that is showing a website hosted on a random domain. So, to
+make this demo run in a standard browser on a non-Preservica domain, one of the following is needed:
+
+- A proxy on the same domain (same protocol, host and port) as this very demo. This is supported 
+  during development and with the Docker image; when using `yarn serve` or `docker run` then enter
+  `/proxy/` in the CORS proxy field of the configuration screen when running this demo.
+
+- Or, a CORS-proxy on any domain and port, which adds or relaxes CORS headers to effectively allow
+  everything we need:
+  
+  - It gets the full API URL appended, without any additional encoding. So, the appended URL should
+    be fetched without first doing any decoding.
+
+  - It should support OPTIONS, HEAD, GET and POST. (OPTIONS may be handled by the proxy.)
+
+  - It should either use `Access-Control-Allow-Headers: *` or include `preservica-access-token`
+    when getting an OPTIONS request with `Access-Control-Request-Headers: preservica-access-token`.
+
+  - To make this demo use the suggested (original) file name when downloading content, the proxy's
+    response must include `Access-Control-Expose-Headers: Content-Disposition`.
 
 ## Viewing and downloading content
 
