@@ -40,15 +40,21 @@ export default defineComponent({
       },
       [404]
     ).then(async (response) => {
-      // If the thumbnail cannot be rendered then we get a 404 Not Found.
+      // If the thumbnail cannot be rendered then we get a 404 Not Found
       if (response.ok) {
-        renderUrl.value = window.URL.createObjectURL(await response.blob());
+        renderUrl.value = URL.createObjectURL(await response.blob());
       } else {
         hasError.value = true;
       }
     });
 
     return { renderUrl, hasError };
+  },
+
+  beforeUnmount() {
+    if (this.renderUrl) {
+      URL.revokeObjectURL(this.renderUrl);
+    }
   },
 });
 </script>
@@ -57,7 +63,6 @@ export default defineComponent({
 .thumbnail {
   width: 100px;
   img {
-    // TODO crop?
     height: 100px;
   }
 }
