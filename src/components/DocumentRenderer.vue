@@ -39,7 +39,7 @@ export default defineComponent({
     // HEAD request using the proxy so we can catch the 403, and if successful then embed the iframe
     // with the non-proxied direct URL (both URLs including an access token).
     pathWithToken(
-      // The placeholder `{token}` is replaced by fullUrlWithToken
+      // The placeholder `{token}` is replaced by pathWithToken
       `Render/render/external?entity=${entity}&entityRef=${entityRef}&token={token}`
     ).then(async (path) => {
       const resp = await fetchWithDefaults(

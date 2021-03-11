@@ -64,11 +64,18 @@
       </TabPanel>
 
       <TabPanel header="Request">
-        <p class="intro p-mb-6">
-          This is the request that will be sent to the API. You can edit this manually, but it will
-          also be updated when making changes in the other tabs and input fields. Making changes on
-          the Metadata tab will override both <code>metadata</code> and <code>query.fields</code>.
-        </p>
+        <div class="intro p-mb-6">
+          <p>
+            This is the request that will be sent to the API, along with the values for
+            <code>start</code>, <code>max</code> and the optional <code>parenthierarchy</code> and
+            <code>id</code> for some API types.
+          </p>
+          <p>
+            You can edit this manually, but it will also be updated when making changes in the other
+            tabs and input fields. Making changes on the Metadata tab will override both
+            <code>metadata</code> and <code>query.fields</code>.
+          </p>
+        </div>
         <div>
           <div class="p-fluid p-formgrid p-grid p-text-left">
             <div class="p-field p-col-12">

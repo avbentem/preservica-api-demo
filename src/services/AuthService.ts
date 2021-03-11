@@ -120,6 +120,7 @@ export class AuthService {
       throw 'No credentials set';
     }
     // TODO we could actually refresh asynchronously and return the old token if time permits?
+    // TODO Maybe require some larger minimum remaining lifetime for the viewer?
     if (!this.user.value || this.user.value.validUntil - Date.now() < MIN_TTL_MS) {
       await this.login();
     }

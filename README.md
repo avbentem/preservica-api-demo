@@ -18,6 +18,33 @@ See it in action on <https://avbentem.github.io/preservica-api-demo>
   - Fetch content when clicking result
 - Embedded Swagger UI with auto-refresh access token?
 
+## Viewing and downloading content
+
+A Preservica-provided `<iframe>` is used to view documents. This works even when not being requested
+through the proxy server, and uses a URL that includes a `token` URL parameter. However, if keeping
+the viewer open beyond the token's lifetime, then the `<iframe>` may prompt for credentials. (A sane
+browser should warn you that these credentials are not sent to this demo website, but to the
+Preservica server that hosts the embedded viewer.)
+
+The server sets the header `Access-Control-Allow-Origin: https://<tenant>.access.preservica.com`,
+and as the proxy server is not used here, the demo cannot interact with the embedded content. So, it
+cannot tell if loading threw any HTTP error, and when content cannot be viewed using Preservica's
+viewer, this would result in an embedded Preservica error page. To avoid that, the demo first makes
+a proxied HEAD request to the same URL, for which the browser thinks it's not cross-domain. Next, if
+this yields a 403 Forbidden or 404 Not Found for the given object then the viewer is simply not
+embedded. Alternatively we could try to proxy the `<iframe>` but that would break if the viewer
+itself makes any absolute requests to other domains.
+
+For thumbnails and to download content an HTTP header with an access token is needed, rather than a
+token in the URL. This implies that in this browser-based demo the thumbnails and content are first
+fully downloaded by the JavaScript code (using the configured proxy server), and only when completed
+the binary content is passed to the browser, or the browser is triggered to save the content. For
+large downloads, one may want a streaming solution, but in a real use case an intermediate backend
+server would proxy these downloads and add the required authorisation header on the fly.
+
+Just like for the document viewer, for downloads first a HEAD request is made to only show the
+download option when we know that Preservica can deliver that.
+
 ## Development
 
 This uses Vue 3, PrimeVue, PrimeIcons and PrimeFlex with TypeScript.
