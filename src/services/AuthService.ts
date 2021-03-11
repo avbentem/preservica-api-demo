@@ -77,8 +77,9 @@ export class AuthService {
     this.clearAuth();
 
     const config = this.store.state.config;
-    // TODO percent-encode
-    const body = `username=${config.username}&password=${config.password}&tenant=${config.tenant}&includeUserDetails=true`;
+    const body = `username=${encodeURIComponent(config.username)}&password=${encodeURIComponent(
+      config.password
+    )}&tenant=${encodeURIComponent(config.tenant)}&includeUserDetails=true`;
     const res = await this.fetchWithDefaults('api/accesstoken/login', {
       method: 'POST',
       headers: {
@@ -199,8 +200,10 @@ export class AuthService {
     for (const [name, value] of request.headers.entries()) {
       headers.push(`-H '${name}: ${value}'`);
     }
-    // As the request.body stream will be needed by fetch, just assume init.body will do
-    const body = init?.body ? ` --data '${init?.body}'` : '';
+    // As the request.body stream will be needed by fetch, just assume init.body will do and is text
+    const body = init?.body
+      ? ` --data '${(init.body as string).replace(/(password=)([^&]+)/, '$1SECRET')}'`
+      : '';
     // As request.url will include the proxy, re-create the URL here
     this.lastCurls.value.unshift({
       timestamp: new Date().toISOString(),
