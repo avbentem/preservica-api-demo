@@ -166,7 +166,9 @@
 
   <div v-if="result">
     <!-- value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref -->
-    <h2 v-if="result.value.objectIds?.length === 0">No results</h2>
+    <h2 v-if="result.value.objectIds?.length === 0">
+      No results{{ result.value.totalHits > 0 ? ` for start = ${start.toLocaleString('en')}` : '' }}
+    </h2>
     <h2 v-else>
       Results {{ (resultStart + 1).toLocaleString('en') }}&ndash;{{
         (resultStart + result.value.objectIds?.length).toLocaleString('en')
