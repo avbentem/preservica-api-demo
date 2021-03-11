@@ -19,16 +19,35 @@
       </div>
       <div class="p-field p-col-12">
         <label for="host">API host</label>
-        <InputText id="host" type="text" v-model="config.host" />
+        <InputText
+          id="host"
+          type="text"
+          v-model="config.host"
+          placeholder="https://example.com/"
+          v-tooltip="'The base URL of your Preservica instance, with trailing slash'"
+        />
       </div>
 
       <div class="p-field p-col-12 p-md-3">
         <label for="tenant">Tenant</label>
-        <InputText id="tenant" type="text" v-model="config.tenant" />
+        <InputText
+          id="tenant"
+          type="text"
+          v-model="config.tenant"
+          placeholder="code"
+          v-tooltip="
+            'A short code, not a domain or URL (the same code is also configured in Universal Access)'
+          "
+        />
       </div>
       <div class="p-field p-col-12 p-md-5">
         <label for="username">Username</label>
-        <InputText id="username" type="text" v-model="config.username" />
+        <InputText
+          id="username"
+          type="text"
+          v-model="config.username"
+          v-tooltip="'Usually an email address'"
+        />
       </div>
       <div class="p-field p-col-12 p-md-4">
         <label for="password">Password</label>

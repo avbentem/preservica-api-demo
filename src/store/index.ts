@@ -14,6 +14,12 @@ export interface AppState {
   persisted: boolean;
 }
 
+const fixConfig = (config: Config) => {
+  if (config?.host && !config.host.endsWith('/')) {
+    config.host += '/';
+  }
+};
+
 export default createStore<AppState>({
   // Be strict during development, but in production avoid the extra synchronous deep watcher on the
   // state tree to detect inappropriate mutations
@@ -43,7 +49,7 @@ export default createStore<AppState>({
   },
   mutations: {
     setConfig(state, config: Config) {
-      // TODO check/add trailing slashes?
+      fixConfig(config);
       state.config = config;
     },
 
@@ -54,6 +60,7 @@ export default createStore<AppState>({
 
     // As also watched by the local storage plugin
     persistInStorage(state, config: Config) {
+      fixConfig(config);
       state.config = config;
     },
   },
