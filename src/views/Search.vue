@@ -152,7 +152,14 @@
       </div>
       <div class="p-field p-col-6 p-lg-2 p-md-2">
         <label for="start">Start</label>
-        <InputNumber id="start" v-model="start" :min="0" showButtons locale="en-US" />
+        <InputNumber
+          id="start"
+          v-model="start"
+          :min="0"
+          :step="max || 1"
+          showButtons
+          locale="en-US"
+        />
       </div>
       <div class="p-field p-col-6 p-lg-2 p-md-2">
         <label for="max">Max</label>
