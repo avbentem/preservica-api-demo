@@ -1,6 +1,6 @@
 <template>
   <div v-if="renderUrl && !error">
-    <iframe :id="objectId" :src="renderUrl"></iframe>
+    <iframe :id="objectId" :src="renderUrl" allowfullscreen></iframe>
     <a :href="renderUrl" target='"_blank'>open in new window</a>
   </div>
   <div v-else-if="error">

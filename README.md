@@ -59,6 +59,14 @@ server would proxy these downloads and add the required authorisation header on 
 Just like for the document viewer, for downloads first a HEAD request is made to only show the
 download option when we know that Preservica can deliver that.
 
+The actual viewer depends on the document, like:
+
+- PDF: [PDFjs](https://github.com/mozilla/pdf.js)
+- Image: [OpenSeadragon](https://openseadragon.github.io/)
+- Rich text email message: server-side rendering to HTML
+
+Some viewers may offer a full screen mode, which is explicitly allowed for our `<iframe>`.
+
 Assets that are not stored on a readable storage adapter are not available for preview or download.
 
 ## Development
