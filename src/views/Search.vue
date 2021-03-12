@@ -265,7 +265,10 @@
                 />
               </div>
             </div>
-            <DocumentRenderer :object-id="slotProps.data.objectId" />
+            <DocumentRenderer
+              v-if="!isFolder(slotProps.data)"
+              :object-id="slotProps.data._meta.objectId"
+            />
           </template>
         </DataTable>
       </AccordionTab>
