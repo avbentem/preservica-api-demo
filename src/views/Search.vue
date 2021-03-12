@@ -18,49 +18,7 @@
           Select the metadata to include in the results. The very same items will also be configured
           as filters, but you can manually overrule that in the Request tab.
         </p>
-        <DataTable
-          v-if="fields"
-          :value="fields"
-          v-model:selection="selectedFields"
-          :autoLayout="true"
-          responsiveLayout="scroll"
-          sortMode="multiple"
-          :multiSortMeta="multiSortMeta"
-          :filters="filters"
-          class="p-datatable-sm"
-        >
-          <template #header>
-            <div class="p-d-flex p-jc-end">
-              <span class="p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText
-                  v-model="filters['global'].value"
-                  placeholder="all-column search"
-                  size="50"
-                />
-              </span>
-            </div>
-          </template>
-
-          <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-
-          <Column
-            field="shortName"
-            header="source"
-            :sortable="true"
-            headerClass="p-text-center"
-            bodyClass="p-text-center"
-          >
-          </Column>
-
-          <Column field="displayName" header="name" :sortable="true"> </Column>
-
-          <Column field="shortKey" header="key" :sortable="true"> </Column>
-
-          <Column field="type" header="type" :sortable="true"></Column>
-
-          <Column field="facetable" header="facet" :sortable="true"> </Column>
-        </DataTable>
+        <IndexedFieldsTable :fields="fields" v-model:selection="selectedFields" />
       </TabPanel>
 
       <TabPanel header="Request">
@@ -116,11 +74,11 @@
       </div>
       <div v-if="searchType === 'search-within'" class="p-field p-col-12 p-lg-8 p-md-6">
         <label for="parent-hierarchy">Parent hierarchy (GUID of folder to search within)</label>
-        <InputText id="parent-hierarchy" v-model="parent" :class="parentClass" />
-        <small v-if="/.*\|/.test(parent)"
+        <InputText id="parent-hierarchy" v-model="parent" :class="searchParentClass" />
+        <small v-if="/.*\|/.test(searchParent)"
           >This looks like a CMIS id; you may want to
-          <a href="javascript:undefined" @click="parent = parent.split('|')[1]"
-            >remove the prefix <code>{{ /.*\|/.exec(parent)[0] }}</code></a
+          <a href="javascript:undefined" @click="searchParent = searchParent.split('|')[1]"
+            >remove the prefix <code>{{ /.*\|/.exec(searchParent)[0] }}</code></a
           >
         </small>
       </div>
@@ -131,13 +89,13 @@
         >
         <InputText
           id="cmis-id"
-          v-model="parent"
+          v-model="searchParent"
           placeholder="e.g. sdb:IO|74b6bd3a-a294-499f-80aa-433826718013"
-          :class="parentClass"
+          :class="searchParentClass"
         />
-        <small v-if="parent && parent.length > 7 && !/.*\|/.test(parent)"
+        <small v-if="searchParent && searchParent.length > 7 && !/.*\|/.test(searchParent)"
           >This does not look like a CMIS id; you may want to
-          <a href="javascript:undefined" @click="parent = 'sdb:SO|' + parent"
+          <a href="javascript:undefined" @click="searchParent = 'sdb:SO|' + searchParent"
             >add the prefix <code>sdb:SO|</code></a
           >
         </small>
@@ -197,26 +155,25 @@
       </div>
       <div class="p-field p-col-12 p-lg-2 p-md-2">
         <label for="button">&nbsp;</label>
-        <Button id="button" icon="pi pi-search" @click="search" label="Search" />
+        <Button id="button" icon="pi pi-search" @click="runSearch" label="Search" />
       </div>
     </div>
   </div>
 
   <div v-if="result">
-    <!-- value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref -->
-    <h2 v-if="result.value.objectIds?.length === 0">
-      No results{{ result.value.totalHits > 0 ? ` for start = ${start.toLocaleString('en')}` : '' }}
+    <h2 v-if="!result.objectIds?.length">
+      No results{{ result.totalHits > 0 ? ` for start = ${start.toLocaleString('en')}` : '' }}
     </h2>
     <h2 v-else>
       Results {{ (resultStart + 1).toLocaleString('en') }}&ndash;{{
-        (resultStart + result.value.objectIds?.length).toLocaleString('en')
+        (resultStart + result.objectIds?.length).toLocaleString('en')
       }}
-      of {{ result.value.totalHits.toLocaleString('en') }}
+      of {{ result.totalHits.toLocaleString('en') }}
     </h2>
     <Paginator
       :first="resultStart"
       :rows="resultMax"
-      :totalRecords="result.value.totalHits"
+      :totalRecords="result.totalHits"
       @page="onPaginatorChange($event)"
     ></Paginator>
     <Accordion :activeIndex="0">
@@ -299,31 +256,23 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { FilterMatchMode } from 'primevue/api';
 import { PageState } from 'primevue/paginator';
 import { useToast } from 'primevue/usetoast';
 import AuthWarning from '@/components/AuthWarning.vue';
 import DocumentRenderer from '@/components/DocumentRenderer.vue';
 import DownloadButton from '@/components/DownloadButton.vue';
+import IndexedFieldsTable from '@/components/IndexedFieldsTable.vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import { useAuth } from '@/plugins/Auth';
-import { IndexedField } from '@/views/Indexes.vue';
-
-// Like sdb:IO|31246773-c041-4674-a1d4-4e202f3680a5; it seems this is actually case-insensitive
-const cmisRegex = /^sdb:[IS]O\|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-// Like 31246773-c041-4674-a1d4-4e202f3680a5; it seems this is actually case-insensitive
-const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-interface FieldValues {
-  name: string;
-  values?: string[];
-}
-
-interface ResultMetadata {
-  name: string;
-  value: unknown;
-}
+import {
+  cmisRegex,
+  FieldValues,
+  guidRegex,
+  IndexedField,
+  ResultMetadata,
+  searchTypes,
+  useContentService,
+} from '@/services/ContentService';
 
 interface TableRow {
   _meta?: {
@@ -338,121 +287,34 @@ interface TableColumn {
   header: string;
 }
 
-type SearchType = 'search' | 'search-within' | 'top-level-list' | 'object-children';
-export const searchTypes: { name: string; code: SearchType }[] = [
-  { name: 'Search', code: 'search' },
-  { name: 'Search within', code: 'search-within' },
-  { name: 'Top-level list', code: 'top-level-list' },
-  { name: 'Object children', code: 'object-children' },
-];
-
 export default defineComponent({
-  components: { AuthWarning, DocumentRenderer, DownloadButton, Thumbnail },
+  components: { IndexedFieldsTable, AuthWarning, DocumentRenderer, DownloadButton, Thumbnail },
   setup() {
-    const { configured, fetchWithToken } = useAuth();
     const toast = useToast();
-    const fields = ref<IndexedField[] | undefined>(undefined);
-    const selectedFields = ref<IndexedField[] | undefined>([]);
-    // TODO remove unless we add some dropdowns?
-    const shortNames = ref<string[]>([]);
-    const types = ref<string[]>([]);
-    const filters = ref({
-      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    });
-    const multiSortMeta = ref([
-      // XIP on top
-      { field: 'shortName', order: -1 },
-      { field: 'displayName', order: 1 },
-    ]);
+    const { configured } = useAuth();
+    const {
+      getIndexedFields,
+      searchType,
+      searchParent,
+      query,
+      fields,
+      metadata,
+      start,
+      max,
+      search,
+      result,
+    } = useContentService();
 
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    const result = ref<{ [index: string]: any } | undefined>(undefined);
-    /* eslint-enable  @typescript-eslint/no-explicit-any */
+    const selectedFields = ref<IndexedField[] | undefined>([]);
     const tableColumns = ref<TableColumn[]>([]);
     const tableExpandedRows = ref([]);
     const resultStart = ref(0);
     const resultMax = ref(0);
-    const start = ref(0);
-    const max = ref(10);
-    const searchType = ref<SearchType>('search');
-    const parent = ref<string | undefined>();
 
-    // https://usergroup.preservica.com/documentation/ce/6.2.1/html/GuideToUniversalAccess.html
-    // Each date interval has three parameters.
-    // - The Start and End of the range are the dates which bound the range, which must be entered
-    //   as `YYYY-MM-DD`. You can also use the special value `*`, which means to the end of time,
-    //   i.e. a `*` at the beginning of a range means that all entries with a value in this field
-    //   before the end date will be included, and a `*` in the End field means that all entries
-    //   with a value after the start date will be included.
-    // - The Title field specifies the text that will be shown for the interval when a user performs
-    //   a search. It is also possible to define adjacent date ranges by leaving the End field
-    //   blank. In this case, the interval will use the start date of the next interval as its end
-    //   date (or, if you leave End blank for the last interval, it will use `*` as its End). This
-    //   allows you to create and modify adjacent date ranges without having to edit the endpoints
-    //   twice. If you do this, the ranges which have been set to be adjacent must be in ascending
-    //   date order.
-    //
-    // The example image at the URL above shows a different example that seems to make more sense,
-    // though "title" is still weird in the API call:
-    //
-    //              * - 1999-12-31 Pre 2000
-    //     2000-01-01 - 2009-12-32 2000-2010
-    //     2010-01-01 - *          2010 on
-    //
-    // Any field which is indexed as a tokenised string will be suitable for filtering, including
-    // the following fields from the xip schema:
-    // - Title (title).
-    // - Description (description)
-    const query = ref({
-      q: '',
-      fields: [
-        // Initialize with empty string to show the input field
-        { name: 'xip.title', values: [''] },
-        { name: 'xip.description', values: [''] },
-        { name: 'xip.document_type', values: ['IO'] },
-      ] as FieldValues[],
-      sort: [{ sortFields: ['xip.created'], sortOrder: 'desc' }],
-      facets: ['xip.created', 'xip.format_group_r_Display'],
-      'facet.xip.created.range': [
-        ['*', '', 'Pre 2015'],
-        ['2015-01-01', '', '2015'],
-        ['2016-01-01', '', '2016'],
-        ['2017-01-01', '', '2017'],
-        ['2018-01-01', '', '2018'],
-        ['2019-01-01', '', '2019'],
-        ['2020-01-01', '', '2020'],
-        ['2021-01-01', '*', '2021 and later'],
-      ],
-    });
-
-    const metadata = ref(query.value.fields.map((field) => field.name).join());
-
-    const search = async () => {
+    const runSearch = async () => {
       // TODO add some loading indicator/button spinner
-      result.value = undefined;
       tableExpandedRows.value = [];
-
-      const encodedParent = encodeURIComponent(parent.value || '');
-      const paramSearchWithin =
-        searchType.value === 'search-within' ? `&parenthierarchy=${encodedParent}` : '';
-      const paramObjectChildren =
-        searchType.value === 'object-children' ? `&id=${encodedParent}` : '';
-
-      // TODO Given that the API wants application/x-www-form-urlencoded we should encode the JSON too,
-      // but that's horrible for the curl examples and the server seems lenient?
-      const body = `q=${JSON.stringify(query.value)}&start=${start.value}&max=${
-        max.value
-      }&metadata=${encodeURIComponent(metadata.value)}${paramSearchWithin}${paramObjectChildren}`;
-
-      const res = await fetchWithToken(`api/content/${searchType.value}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body,
-      });
-      result.value = await res.json();
-
+      search();
       // Ensure changes in the metadata do not affect the search results currently displayed
       tableColumns.value = metadata.value?.split(',').map((col) => ({
         field: col,
@@ -464,7 +326,7 @@ export default defineComponent({
 
     const onPaginatorChange = (event: PageState) => {
       start.value = event.page * max.value;
-      return search();
+      runSearch();
     };
 
     const isFolder = (item: TableRow): boolean => {
@@ -473,12 +335,7 @@ export default defineComponent({
 
     // TODO (re-)load once (re-)configured
     if (configured.value) {
-      fetchWithToken('api/content/indexed-fields').then(async (res) => {
-        // value is a property in the Preservica JSON; it does not refer to, e.g., value in Vue's Ref
-        fields.value = (await res.json()).value;
-        // shortNames.value = [...new Set(fields?.value?.value.map((v) => v.shortName))];
-        // types.value = [...new Set(fields?.value?.value.map((v) => v.type))];
-      });
+      getIndexedFields();
     }
 
     return {
@@ -486,18 +343,14 @@ export default defineComponent({
       toast,
       fields,
       selectedFields,
-      filters,
-      multiSortMeta,
-      shortNames,
-      types,
       query,
       start,
       max,
       metadata,
       searchType,
       searchTypes,
-      parent,
-      search,
+      searchParent,
+      runSearch,
       onPaginatorChange,
       result,
       resultStart,
@@ -562,17 +415,17 @@ export default defineComponent({
     searchWithin(objectId: string) {
       this.searchType = 'search-within';
       // Needs just the reference; strip the `sdb:SO|` prefix
-      this.parent = objectId.split('|')[1];
+      this.searchParent = objectId.split('|')[1];
       this.start = 0;
       // TODO we may want to support some navigation/routing to support going back
-      this.search();
+      this.runSearch();
     },
     objectChildren(objectId: string) {
       this.searchType = 'object-children';
       // Needs the full CMIS id, starting with `sdb:SO|`
-      this.parent = objectId;
+      this.searchParent = objectId;
       this.start = 0;
-      this.search();
+      this.runSearch();
     },
   },
   computed: {
@@ -649,12 +502,11 @@ export default defineComponent({
      * ```
      */
     tableResults(): TableRow[] {
-      if (!this.result?.value) {
+      if (!this.result) {
         return [];
       }
-      // `value` is not some Vue.js Ref but part of the Preservica JSON response
-      const results = this.result.value;
-      const rows = results.metadata.map((row: ResultMetadata[]) => {
+      const results = this.result;
+      const rows = this.result.metadata.map((row: ResultMetadata[]) => {
         return row.reduce((acc: TableRow, curr: ResultMetadata) => {
           acc[curr.name] = curr.value;
           return acc;
@@ -670,12 +522,12 @@ export default defineComponent({
         return row;
       });
     },
-    parentClass(): string {
+    searchParentClass(): string {
       if (this.searchType === 'search-within') {
-        return this.parent && guidRegex.test(this.parent) ? '' : 'p-invalid';
+        return this.searchParent && guidRegex.test(this.searchParent) ? '' : 'p-invalid';
       }
       if (this.searchType === 'object-children') {
-        return this.parent && cmisRegex.test(this.parent) ? '' : 'p-invalid';
+        return this.searchParent && cmisRegex.test(this.searchParent) ? '' : 'p-invalid';
       }
       return '';
     },

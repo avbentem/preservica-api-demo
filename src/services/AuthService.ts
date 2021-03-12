@@ -3,7 +3,7 @@
  * authorization header and some default header values.
  *
  * All class methods use arrow function expressions to ensure `this` is preserved and destructuring
- * works, like:
+ * works with {@link useAuth}, like:
  *
  * ```typescript
  * const {configured, fetchWithToken} = useAuth();
