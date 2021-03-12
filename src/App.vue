@@ -31,6 +31,13 @@ export default {
 </script>
 
 <style lang="scss">
+code {
+  font-size: 120%;
+  border: 1px solid lightgray;
+  background-color: #f5f3f3;
+  padding: 0 2px;
+}
+
 #view {
 }
 

@@ -168,7 +168,17 @@
     <div class="p-fluid p-formgrid p-grid p-text-left">
       <div class="p-field p-col-12 p-lg-6 p-md-6">
         <label for="q">Search text</label>
-        <InputText id="q" v-model="q" />
+        <InputText id="q" v-model="q" aria-describedby="q-help" />
+        <small id="q-help"
+          >Search is case-insensitive, supports wildcards <code>*</code> and <code>?</code>, and
+          uppercase operators <code>AND</code> (default), <code>OR</code> and <code>NOT</code>. When
+          not using wildcards then a hyphen <code>-</code> indicates the end of a word. Enclose
+          words in double-quotes for exact phrases.
+          <a
+            href="https://usergroup.preservica.com/documentation/ce/6.2.1/userdocumentation/SystemUserGuide/ch08.html"
+            >More info</a
+          >.</small
+        >
       </div>
       <div class="p-field p-col-6 p-lg-2 p-md-2">
         <label for="start">Start</label>
@@ -185,8 +195,9 @@
         <label for="max">Max</label>
         <InputNumber id="max" v-model="max" :min="0" showButtons locale="en-US" />
       </div>
-      <div class="p-field p-col-12 p-lg-2 p-md-2 p-as-end">
-        <Button icon="pi pi-search" @click="search" label="Search" />
+      <div class="p-field p-col-12 p-lg-2 p-md-2">
+        <label for="button">&nbsp;</label>
+        <Button id="button" icon="pi pi-search" @click="search" label="Search" />
       </div>
     </div>
   </div>
