@@ -74,7 +74,12 @@
       </div>
       <div v-if="searchType === 'search-within'" class="p-field p-col-12 p-lg-8 p-md-6">
         <label for="parent-hierarchy">Parent hierarchy (GUID of folder to search within)</label>
-        <InputText id="parent-hierarchy" v-model="searchParent" :class="searchParentClass" />
+        <InputText
+          id="parent-hierarchy"
+          v-model="searchParent"
+          placeholder="e.g. 74b6bd3a-a294-499f-80aa-433826718013"
+          :class="searchParentClass"
+        />
         <small v-if="/.*\|/.test(searchParent)"
           >This looks like a CMIS id; you may want to
           <a href="javascript:undefined" @click="searchParent = searchParent.split('|')[1]"
@@ -125,7 +130,12 @@
     </div>
     <div class="p-fluid p-formgrid p-grid p-text-left">
       <div class="p-field p-col-12 p-lg-6 p-md-6">
-        <label for="q">Search text</label>
+        <label for="q"
+          >Search text
+          <Tag v-if="searchType === 'top-level-list'" severity="warning"
+            >not used for top-level list</Tag
+          ></label
+        >
         <InputText id="q" v-model="q" aria-describedby="q-help" />
         <small id="q-help"
           >Search is case-insensitive, supports wildcards <code>*</code> and <code>?</code>, and

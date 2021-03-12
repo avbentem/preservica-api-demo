@@ -40,9 +40,9 @@ export interface IndexedFieldsResponse {
 
 export type SearchType = 'search' | 'search-within' | 'top-level-list' | 'object-children';
 export const searchTypes: { name: string; code: SearchType }[] = [
+  { name: 'Top-level list', code: 'top-level-list' },
   { name: 'Search', code: 'search' },
   { name: 'Search within', code: 'search-within' },
-  { name: 'Top-level list', code: 'top-level-list' },
   { name: 'Object children', code: 'object-children' },
 ];
 

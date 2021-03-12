@@ -15,6 +15,7 @@ import Password from 'primevue/password';
 import PrimeVue from 'primevue/config';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
+import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
@@ -50,6 +51,7 @@ app.component('Paginator', Paginator);
 app.component('Password', Password);
 app.component('TabPanel', TabPanel);
 app.component('TabView', TabView);
+app.component('Tag', Tag);
 app.component('Textarea', Textarea);
 app.component('Toast', Toast);
 
