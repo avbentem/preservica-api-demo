@@ -12,11 +12,12 @@ import { useAuth } from '@/plugins/Auth';
  *
  * ```json
  * {
- *   "shortName": "ToPX",
- *   "uri": "http://www.nationaalarchief.nl/ToPX/v2.3",
- *   "index": "actornaam",
- *   "displayName": "Naam actor",
- *   "type": "SINGLE_VALUED_STRING_DEFAULT",
+ *   "shortName": "xip",
+ *   "uri": "http://preservica.com/XIP/v6.2",
+ *   "index": "created",
+ *   "shortKey": "xip.created",
+ *   "displayName": "Created Date",
+ *   "type": "SINGLE_VALUED_DATE",
  *   "facetable": true
  * }
  * ```
@@ -36,6 +37,10 @@ export interface IndexedFieldsResponse {
   success: boolean;
   version: number;
   value: IndexedField[];
+}
+
+export interface IndexedFieldsLookup {
+  [shortKey: string]: IndexedField;
 }
 
 export type SearchType = 'search' | 'search-within' | 'top-level-list' | 'object-children';
@@ -131,7 +136,8 @@ export function useContentService() {
     ],
   });
 
-  const fields = ref<IndexedField[] | undefined>(undefined);
+  const indexedFields = ref<IndexedField[] | undefined>(undefined);
+  const indexedFieldsLookup = ref<IndexedFieldsLookup | undefined>(undefined);
   const metadata = ref(query.value.fields.map((field) => field.name).join());
 
   const start = ref(0);
@@ -141,13 +147,19 @@ export function useContentService() {
   const result = ref<SearchResult | undefined>(undefined);
 
   /**
-   * Fetch the indexed fields from the Content API and populate (and return) {@link fields}.
+   * Fetch the indexed fields from the Content API and populate (and return) {@link indexedFields}.
    */
   const getIndexedFields = async (): Promise<IndexedField[] | undefined> => {
     const res = await fetchWithToken('api/content/indexed-fields');
     // The second value is a property in the Preservica JSON; it does not refer to, e.g., Vue's Ref
-    fields.value = ((await res.json()) as IndexedFieldsResponse).value;
-    return fields.value;
+    indexedFields.value = ((await res.json()) as IndexedFieldsResponse).value;
+
+    indexedFieldsLookup.value = indexedFields.value.reduce((acc, field) => {
+      acc[field.shortKey] = field;
+      return acc;
+    }, {} as IndexedFieldsLookup);
+
+    return indexedFields.value;
   };
 
   /**
@@ -183,7 +195,8 @@ export function useContentService() {
 
   return {
     getIndexedFields,
-    fields,
+    indexedFields,
+    indexedFieldsLookup,
     searchType,
     searchParent,
     query,

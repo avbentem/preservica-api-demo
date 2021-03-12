@@ -18,7 +18,7 @@
           Select the metadata to include in the results. The very same items will also be configured
           as filters, but you can manually overrule that in the Request tab.
         </p>
-        <IndexedFieldsTable :fields="fields" v-model:selection="selectedFields" />
+        <IndexedFieldsTable :fields="indexedFields" v-model:selection="selectedFields" />
       </TabPanel>
 
       <TabPanel header="Request">
@@ -224,7 +224,7 @@
             :key="col.field"
           >
             <template #body="slotProps">
-              {{ slotProps.data[col.field] }}
+              {{ slotProps.data[col.field + '.display'] || slotProps.data[col.field] }}
             </template>
           </Column>
 
@@ -283,6 +283,7 @@ import {
   searchTypes,
   useContentService,
 } from '@/services/ContentService';
+import { formatTimestamp } from '@/utils/formatters';
 
 interface TableRow {
   _meta?: {
@@ -307,7 +308,8 @@ export default defineComponent({
       searchType,
       searchParent,
       query,
-      fields,
+      indexedFields,
+      indexedFieldsLookup,
       metadata,
       start,
       max,
@@ -328,7 +330,7 @@ export default defineComponent({
       // Ensure changes in the metadata do not affect the search results currently displayed
       tableColumns.value = metadata.value?.split(',').map((col) => ({
         field: col,
-        header: fields.value?.find((f: IndexedField) => f.shortKey === col)?.displayName || col,
+        header: indexedFieldsLookup.value?.[col]?.displayName || col,
       }));
       resultStart.value = start.value;
       resultMax.value = max.value;
@@ -351,7 +353,8 @@ export default defineComponent({
     return {
       configured,
       toast,
-      fields,
+      indexedFields,
+      indexedFieldsLookup,
       selectedFields,
       query,
       start,
@@ -390,14 +393,14 @@ export default defineComponent({
      * JSON version of the request, which is likely to be invalid while typing.
      */
     onTabChange(/* event: { originalEvent: Event; index: number } */) {
-      if (!this.fields || !this.query) {
+      if (!this.indexedFields || !this.query) {
         // In case tabs are changed before the list of fields has been fetched
         return;
       }
       const newSelectedFields = [];
       for (const field of this.query.fields) {
         // After manually making changes in the JSON text area, we may not find a match
-        const f = this.fields.find((f) => field.name === f.shortKey);
+        const f = this.indexedFieldsLookup?.[field.name];
         if (!f) {
           this.toast.add({
             severity: 'error',
@@ -414,7 +417,7 @@ export default defineComponent({
       this.selectedFields = newSelectedFields;
     },
     filterName(field: FieldValues): string {
-      return this.fields?.find((f) => f.shortKey === field.name)?.displayName || field.name;
+      return this.indexedFieldsLookup?.[field.name]?.displayName || field.name;
     },
     addFilter(field: FieldValues) {
       field.values?.push('');
@@ -494,7 +497,7 @@ export default defineComponent({
      * ]
      * ```
      *
-     * ...to:
+     * ...to (guessing your local timezone for timestamps):
      *
      * ```json
      * [
@@ -504,6 +507,7 @@ export default defineComponent({
      *       "highlighting": ["text fragment(s) as HTML, with <em>matches</em> highlighted"]
      *     },
      *     "xip.created": 1615031390000,
+     *     "xip.created.display": "2021-03-06 12:49",
      *     "xip.title": "some title",
      *     ...
      *   },
@@ -519,6 +523,9 @@ export default defineComponent({
       const rows = this.result.metadata.map((row: ResultMetadata[]) => {
         return row.reduce((acc: TableRow, curr: ResultMetadata) => {
           acc[curr.name] = curr.value;
+          if (this.indexedFieldsLookup?.[curr.name]?.type?.indexOf('DATE') !== -1) {
+            acc[curr.name + '.display'] = formatTimestamp(curr.value as number);
+          }
           return acc;
         }, {});
       });

@@ -16,14 +16,14 @@
     />
   </div>
 
-  <div v-if="fields">
+  <div v-if="indexedFields">
     <Accordion :activeIndex="0">
       <AccordionTab header="Table">
-        <IndexedFieldsTable :fields="fields" />
+        <IndexedFieldsTable :fields="indexedFields" />
       </AccordionTab>
 
       <AccordionTab header="JSON">
-        <div class="json">{{ fields }}</div>
+        <div class="json">{{ indexedFields }}</div>
       </AccordionTab>
     </Accordion>
   </div>
@@ -44,9 +44,7 @@ export default defineComponent({
     const { configured } = useAuth();
     const { getIndexedFields } = useContentService();
 
-    const fields = ref<IndexedField[] | undefined>(undefined);
-    const shortNames = ref<string[]>([]);
-    const types = ref<string[]>([]);
+    const indexedFields = ref<IndexedField[] | undefined>(undefined);
     const filters = ref({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
@@ -56,12 +54,10 @@ export default defineComponent({
     ]);
 
     const getFields = async () => {
-      fields.value = await getIndexedFields();
-      shortNames.value = [...new Set(fields?.value?.map((v) => v.shortName))];
-      types.value = [...new Set(fields?.value?.map((v) => v.type))];
+      indexedFields.value = await getIndexedFields();
     };
 
-    return { configured, fields, filters, multiSortMeta, shortNames, types, getFields };
+    return { configured, indexedFields, filters, multiSortMeta, getFields };
   },
 });
 </script>
