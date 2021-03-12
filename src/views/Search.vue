@@ -135,6 +135,12 @@
           placeholder="e.g. sdb:IO|74b6bd3a-a294-499f-80aa-433826718013"
           :class="parentClass"
         />
+        <small v-if="parent && parent.length > 7 && !/.*\|/.test(parent)"
+          >This does not look like a CMIS id; you may want to
+          <a href="javascript:undefined" @click="parent = 'sdb:SO|' + parent"
+            >add the prefix <code>sdb:SO|</code></a
+          >
+        </small>
       </div>
     </div>
 
