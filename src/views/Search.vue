@@ -74,7 +74,7 @@
       </div>
       <div v-if="searchType === 'search-within'" class="p-field p-col-12 p-lg-8 p-md-6">
         <label for="parent-hierarchy">Parent hierarchy (GUID of folder to search within)</label>
-        <InputText id="parent-hierarchy" v-model="parent" :class="searchParentClass" />
+        <InputText id="parent-hierarchy" v-model="searchParent" :class="searchParentClass" />
         <small v-if="/.*\|/.test(searchParent)"
           >This looks like a CMIS id; you may want to
           <a href="javascript:undefined" @click="searchParent = searchParent.split('|')[1]"
