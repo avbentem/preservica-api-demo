@@ -77,4 +77,12 @@ code {
     }
   }
 }
+
+.p-toast {
+  // Ensure we can always read the full error message and see/click the close button
+  word-wrap: anywhere;
+  width: auto;
+  min-width: 25rem;
+  max-width: 35rem;
+}
 </style>
