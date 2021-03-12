@@ -115,8 +115,14 @@
         />
       </div>
       <div v-if="searchType === 'search-within'" class="p-field p-col-12 p-lg-8 p-md-6">
-        <label for="parent-hierarchy">Parent hierarchy (ref of folder to search within)</label>
-        <InputText id="parent-hierarchy" v-model="parent" />
+        <label for="parent-hierarchy">Parent hierarchy (GUID of folder to search within)</label>
+        <InputText id="parent-hierarchy" v-model="parent" :class="parentClass" />
+        <small v-if="/.*\|/.test(parent)"
+          >This looks like a CMIS id; you may want to
+          <a href="javascript:undefined" @click="parent = parent.split('|')[1]"
+            >remove the prefix <code>{{ /.*\|/.exec(parent)[0] }}</code></a
+          >
+        </small>
       </div>
       <div v-if="searchType === 'object-children'" class="p-field p-col-12 p-lg-8 p-md-6">
         <!-- TODO this also allows for `includevirtual` -->
@@ -127,6 +133,7 @@
           id="cmis-id"
           v-model="parent"
           placeholder="e.g. sdb:IO|74b6bd3a-a294-499f-80aa-433826718013"
+          :class="parentClass"
         />
       </div>
     </div>
@@ -211,7 +218,7 @@
             :style="{ width: '100px' }"
           >
             <template #body="slotProps">
-              <Thumbnail :object-id="slotProps.data.objectId" />
+              <Thumbnail :object-id="slotProps.data._meta.objectId" />
             </template>
           </Column>
 
@@ -221,7 +228,8 @@
             bodyClass="p-text-center highlight"
           >
             <template #body="slotProps">
-              <div v-html="slotProps.data.highlighting" />
+              <!-- TODO is an array -->
+              <div v-html="slotProps.data._meta.highlighting" />
             </template>
           </Column>
 
@@ -238,8 +246,24 @@
 
           <template #expansion="slotProps">
             <div class="p-mb-2">
-              <DownloadButton :object-id="slotProps.data.objectId" />
-              <p>{{ slotProps.data.objectId }}</p>
+              <DownloadButton :object-id="slotProps.data._meta.objectId" />
+              <div class="p-d-flex">
+                <p>{{ slotProps.data._meta.objectId }}</p>
+                <Button
+                  v-if="isFolder(slotProps.data)"
+                  label="search within all descendants"
+                  class="p-button-link"
+                  v-tooltip.top="'Search within all descendants of this structural object'"
+                  @click="searchWithin(slotProps.data._meta.objectId)"
+                />
+                <Button
+                  v-if="isFolder(slotProps.data)"
+                  label="search in direct children"
+                  class="p-button-link"
+                  v-tooltip.top="'Search in direct children of this structural object'"
+                  @click="objectChildren(slotProps.data._meta.objectId)"
+                />
+              </div>
             </div>
             <DocumentRenderer :object-id="slotProps.data.objectId" />
           </template>
@@ -265,6 +289,12 @@ import Thumbnail from '@/components/Thumbnail.vue';
 import { useAuth } from '@/plugins/Auth';
 import { IndexedField } from '@/views/Indexes.vue';
 
+// Like sdb:IO|31246773-c041-4674-a1d4-4e202f3680a5; it seems this is actually case-insensitive
+const cmisRegex = /^sdb:[IS]O\|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Like 31246773-c041-4674-a1d4-4e202f3680a5; it seems this is actually case-insensitive
+const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 interface FieldValues {
   name: string;
   values?: string[];
@@ -276,6 +306,10 @@ interface ResultMetadata {
 }
 
 interface TableRow {
+  _meta?: {
+    objectId: string;
+    highlighting: string[];
+  };
   [index: string]: unknown;
 }
 
@@ -413,6 +447,10 @@ export default defineComponent({
       return search();
     };
 
+    const isFolder = (item: TableRow): boolean => {
+      return item._meta?.objectId.startsWith('sdb:SO|') ?? false;
+    };
+
     // TODO (re-)load once (re-)configured
     if (configured.value) {
       fetchWithToken('api/content/indexed-fields').then(async (res) => {
@@ -446,6 +484,7 @@ export default defineComponent({
       resultMax,
       tableColumns,
       tableExpandedRows,
+      isFolder,
     };
   },
 
@@ -500,6 +539,21 @@ export default defineComponent({
     removeFilter(field: FieldValues, index: number) {
       field.values?.splice(index, 1);
     },
+    searchWithin(objectId: string) {
+      this.searchType = 'search-within';
+      // Needs just the reference; strip the `sdb:SO|` prefix
+      this.parent = objectId.split('|')[1];
+      this.start = 0;
+      // TODO we may want to support some navigation/routing to support going back
+      this.search();
+    },
+    objectChildren(objectId: string) {
+      this.searchType = 'object-children';
+      // Needs the full CMIS id, starting with `sdb:SO|`
+      this.parent = objectId;
+      this.start = 0;
+      this.search();
+    },
   },
   computed: {
     queryJson: {
@@ -550,7 +604,7 @@ export default defineComponent({
      *   ],
      *   "highlighting": {
      *     "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2": [
-     *       ", inclusief de aan te brengen verbreding is weergegeven op de <em>tekening</em> \nin de bijlage bij deze aanvraag"
+     *       "text fragment(s) as HTML, with <em>matches</em> highlighted"
      *     ],
      *     ...
      *   ],
@@ -562,7 +616,10 @@ export default defineComponent({
      * ```json
      * [
      *   {
-     *     "objectId": "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2",
+     *     "_meta": {
+     *       objectId": "sdb:IO|748602d1-9e9f-4e08-a100-5dc5b076d3d2",
+     *       "highlighting": ["text fragment(s) as HTML, with <em>matches</em> highlighted"]
+     *     },
      *     "xip.created": 1615031390000,
      *     "xip.title": "some title",
      *     ...
@@ -585,11 +642,22 @@ export default defineComponent({
       });
       return rows.map((row: TableRow, index: number) => {
         const objectId = results.objectIds[index];
-        row['objectId'] = objectId;
-        // This is an array
-        row['highlighting'] = results.highlighting[objectId];
+        row._meta = {
+          objectId: objectId,
+          // This is an array
+          highlighting: results.highlighting[objectId],
+        };
         return row;
       });
+    },
+    parentClass(): string {
+      if (this.searchType === 'search-within') {
+        return this.parent && guidRegex.test(this.parent) ? '' : 'p-invalid';
+      }
+      if (this.searchType === 'object-children') {
+        return this.parent && cmisRegex.test(this.parent) ? '' : 'p-invalid';
+      }
+      return '';
     },
   },
 });
