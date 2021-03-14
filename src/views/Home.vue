@@ -5,7 +5,10 @@
       This is a (work in progress) kitchen sink showing various usage examples for some of
       <a href="https://developers.preservica.com/api-reference">the Preservica APIs.</a>
     </p>
-    <p>This application runs in your browser.</p>
+    <p>
+      This demo application runs in your browser, but for a typical use case the APIs would be
+      accessed from a server application instead.
+    </p>
     <AuthWarning />
     <p class="affiliation">
       Preservica&trade; is a trademark of <a href="https://preservica.com/">Preservica Ltd</a>. The
