@@ -62,9 +62,38 @@ export interface FieldValues {
   values?: string[];
 }
 
+export interface ContentQuery {
+  q: string;
+  fields: FieldValues[];
+  sort: { sortFields: string[]; sortOrder: 'asc' | 'desc' }[];
+  facets: string[];
+  [key: string]: unknown;
+}
+
 export interface ResultMetadata {
   name: string;
   value: unknown;
+}
+
+export interface ResultFacet {
+  name: string;
+  fieldName: string;
+  displayName: string;
+  terms: {
+    name: string;
+    displayName: string;
+    count: number;
+  }[];
+}
+
+/**
+ * State of user-selected facet values.
+ */
+export interface FacetTermStates {
+  [facetName: string]: {
+    // true to include the constraint, false to exclude the constraint, undefined otherwise
+    [termName: string]: boolean | null;
+  };
 }
 
 /**
@@ -75,6 +104,7 @@ export interface SearchResult {
   totalHits: number;
   // Documented as "a CMIS value which is always false"
   simpleChildSearch: boolean;
+  facets: ResultFacet[];
   metadata: ResultMetadata[][];
   highlighting: { [key: string]: string[] };
 }
@@ -114,13 +144,15 @@ export function useContentService() {
   // the following fields from the xip schema:
   // - Title (title).
   // - Description (description)
-  const query = ref({
+  const query = ref<ContentQuery>({
     q: '',
     fields: [
       // Initialize with empty string to show the input field
       { name: 'xip.title', values: [''] },
       { name: 'xip.description', values: [''] },
       { name: 'xip.document_type', values: ['IO'] },
+      { name: 'xip.format_group_r_Display', values: [] },
+      { name: 'xip.created', values: [] },
     ] as FieldValues[],
     sort: [{ sortFields: ['xip.created'], sortOrder: 'desc' }],
     facets: ['xip.created', 'xip.format_group_r_Display'],
@@ -144,6 +176,7 @@ export function useContentService() {
   const max = ref(10);
   const searchType = ref<SearchType>('search');
   const searchParent = ref<string | undefined>();
+  const facetsTermsStates = ref<FacetTermStates | undefined>();
   const result = ref<SearchResult | undefined>(undefined);
 
   /**
@@ -191,6 +224,24 @@ export function useContentService() {
 
     // The second value is a property in the Preservica JSON; it does not refer to, e.g., Vue's Ref
     result.value = ((await res.json()) as SearchResponse).value;
+
+    // Fix `{ "name": "_interval_0 Pre 2015", "displayName": "_interval_0 Pre 2015", "count": 0 },`
+    result.value.facets?.forEach((facet) => {
+      facet.terms.forEach((term) => {
+        term.name = term.name.split(' ')[0];
+        term.displayName = term.displayName.replace(/^_.*? /, '');
+      });
+    });
+
+    // Ensure facetsTermState only holds constraints we know about in this result (like when the
+    // JSON has been edited since the previous search) and copy any existing value.
+    facetsTermsStates.value = result.value.facets.reduce((acc, facet) => {
+      acc[facet.name] = facet.terms.reduce((terms, term) => {
+        terms[term.name] = facetsTermsStates.value?.[facet.name][term.name] ?? null;
+        return terms;
+      }, {} as { [termName: string]: null | true | false });
+      return acc;
+    }, {} as FacetTermStates);
   };
 
   return {
@@ -203,6 +254,7 @@ export function useContentService() {
     metadata,
     start,
     max,
+    facetsTermsStates,
     search,
     result,
   };

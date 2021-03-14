@@ -139,9 +139,10 @@
         <InputText id="q" v-model="q" aria-describedby="q-help" />
         <small id="q-help"
           >Search is case-insensitive, supports wildcards <code>*</code> and <code>?</code>, and
-          uppercase operators <code>AND</code> (default), <code>OR</code> and <code>NOT</code>. When
-          not using wildcards then a hyphen <code>-</code> indicates the end of a word. Enclose
-          words in double-quotes for exact phrases.
+          uppercase operators <code>AND</code>/<code>&&</code> (default),
+          <code>OR</code>/<code>||</code>, <code>NOT</code>/<code>!</code>/<code>-</code> and
+          <code>+</code>. When not using wildcards then a trailing hyphen <code>-</code> indicates
+          the end of a word. Enclose words in double-quotes for exact phrases.
           <a
             href="https://usergroup.preservica.com/documentation/ce/6.2.1/userdocumentation/SystemUserGuide/ch08.html"
             >More info</a
@@ -186,6 +187,19 @@
       :totalRecords="result.totalHits"
       @page="onPaginatorChange($event)"
     ></Paginator>
+    <div v-for="facet of result.facets" v-bind:key="facet.name" class="p-mb-4">
+      <h3>{{ facet.displayName }}</h3>
+      <span v-for="term of facet.terms" v-bind:key="term.name" class="p-mx-1">
+        [<Checkbox
+          :binary="true"
+          :id="`term-${term.name}`"
+          v-model="facetsTermsStates[facet.name][term.name]"
+          class="p-mr-1"
+        />
+        <label :for="`term-${term.name}`"> {{ term.displayName }}: {{ term.count }}</label
+        >]
+      </span>
+    </div>
     <Accordion :activeIndex="0">
       <AccordionTab header="Table">
         <DataTable
@@ -276,6 +290,7 @@ import Thumbnail from '@/components/Thumbnail.vue';
 import { useAuth } from '@/plugins/Auth';
 import {
   cmisRegex,
+  FacetTermStates,
   FieldValues,
   guidRegex,
   IndexedField,
@@ -314,6 +329,7 @@ export default defineComponent({
       start,
       max,
       search,
+      facetsTermsStates,
       result,
     } = useContentService();
 
@@ -363,6 +379,7 @@ export default defineComponent({
       searchType,
       searchTypes,
       searchParent,
+      facetsTermsStates,
       runSearch,
       onPaginatorChange,
       result,
@@ -384,7 +401,45 @@ export default defineComponent({
       this.metadata = this.query.fields.map((field) => field.name).join();
     },
     query(value) {
+      // TODO also update the facets?
       this.q = value.q;
+    },
+    facetsTermsStates: {
+      deep: true,
+      handler(newStates: FacetTermStates) {
+        // Basic implementation: boldly add/remove filters.
+        // TODO This will not return facet counts for any facet value not selected
+        // TODO This may be removed if user interacts with Metadata tab?
+        // TODO This only works to include facet values; what about excluding facet values?
+        // TODO Sync when user changes the filters?
+        Object.getOwnPropertyNames(newStates).forEach((facetName) => {
+          const facet = newStates[facetName];
+          const field = this.query.fields.find((field) => field.name === facetName);
+          Object.getOwnPropertyNames(facet).forEach((termName) => {
+            const includeTerm = facet[termName];
+            const currentIndex = field?.values?.indexOf(termName);
+            if (
+              currentIndex !== undefined &&
+              currentIndex >= 0 &&
+              (includeTerm === null || !includeTerm)
+            ) {
+              field?.values?.splice(currentIndex, 1);
+            } else if (currentIndex === -1 && includeTerm === true) {
+              if (!field) {
+                this.query.fields.push({
+                  name: facetName,
+                  values: [termName],
+                });
+              } else {
+                if (!field.values) {
+                  field.values = [];
+                }
+                field.values.push(termName);
+              }
+            }
+          });
+        });
+      },
     },
   },
   methods: {
