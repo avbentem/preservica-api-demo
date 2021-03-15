@@ -296,6 +296,7 @@ import {
   IndexedField,
   ResultMetadata,
   searchTypes,
+  TermStates,
   useContentService,
 } from '@/services/ContentService';
 import { formatTimestamp } from '@/utils/formatters';
@@ -402,10 +403,28 @@ export default defineComponent({
       // Regardless if the items in `query.fields` and `metadata` were the same
       this.metadata = this.query.fields.map((field) => field.name).join();
     },
-    query(value) {
-      // TODO also update the facets?
-      this.q = value.q;
+
+    query: {
+      deep: true,
+      handler(value) {
+        this.q = value.q;
+
+        // If a term facet (field facet) is defined for a field, then update the term checkboxes
+        value.fields.forEach((field: FieldValues) => {
+          const termStates: TermStates | undefined = this.facetsTermsStates?.[field.name];
+          if (termStates) {
+            // Though it may not make much sense for a user to have specified field filter values
+            // that are not known as facet terms, let's allow for that. So, iterate the known terms
+            // and ignore the field values we don't actually know as facet terms:
+            Object.getOwnPropertyNames(termStates).forEach((termName) => {
+              // Map undefined to null
+              termStates[termName] = field.values?.includes(termName) || null;
+            });
+          }
+        });
+      },
     },
+
     facetsTermsStates: {
       deep: true,
       handler(newStates: FacetTermStates) {
@@ -413,7 +432,6 @@ export default defineComponent({
         // TODO This will not return facet counts for any facet value not selected
         // TODO This may be removed if user interacts with Metadata tab?
         // TODO This only works to include facet values; what about excluding facet values?
-        // TODO Sync when user changes the filters?
         Object.getOwnPropertyNames(newStates).forEach((facetName) => {
           const facet = newStates[facetName];
           const field = this.query.fields.find((field) => field.name === facetName);

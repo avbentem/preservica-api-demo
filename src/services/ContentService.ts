@@ -89,11 +89,17 @@ export interface ResultFacet {
 /**
  * State of user-selected facet values.
  */
+export interface TermStates {
+  // TODO remove null if we're not going to support TriStateCheckbox
+  // true to include the constraint, false to exclude the constraint, undefined otherwise
+  [termName: string]: boolean | null;
+}
+
+/**
+ * States of user-selected facet values for one or more facets.
+ */
 export interface FacetTermStates {
-  [facetName: string]: {
-    // true to include the constraint, false to exclude the constraint, undefined otherwise
-    [termName: string]: boolean | null;
-  };
+  [facetName: string]: TermStates;
 }
 
 /**
@@ -242,9 +248,19 @@ export function useContentService() {
     // JSON has been edited since the previous search) and copy any existing value.
     facetsTermsStates.value = result.value.facets.reduce((acc, facet) => {
       acc[facet.name] = facet.terms.reduce((terms, term) => {
-        terms[term.name] = facetsTermsStates.value?.[facet.name][term.name] ?? null;
+        if (facetsTermsStates.value) {
+          terms[term.name] = facetsTermsStates.value?.[facet.name][term.name] ?? null;
+        } else {
+          // For the very first search we may have specified filter values in `query.fields` that
+          // were not synced to the (non-existing) facet term checkboxes at that time. Some or all
+          // of those may now indeed be listed as existing facet terms: enable the checkbox then.
+          terms[term.name] =
+            query.value.fields
+              .find((field) => field.name === facet.name)
+              ?.values?.includes(term.name) ?? null;
+        }
         return terms;
-      }, {} as { [termName: string]: null | true | false });
+      }, {} as TermStates);
       return acc;
     }, {} as FacetTermStates);
   };
