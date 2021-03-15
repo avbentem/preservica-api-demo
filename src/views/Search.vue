@@ -272,7 +272,7 @@
       </AccordionTab>
 
       <AccordionTab header="JSON">
-        <div class="json">{{ result }}</div>
+        <div class="json">{{ json }}</div>
       </AccordionTab>
     </Accordion>
   </div>
@@ -330,6 +330,7 @@ export default defineComponent({
       max,
       search,
       facetsTermsStates,
+      json,
       result,
     } = useContentService();
 
@@ -382,6 +383,7 @@ export default defineComponent({
       facetsTermsStates,
       runSearch,
       onPaginatorChange,
+      json,
       result,
       resultStart,
       resultMax,

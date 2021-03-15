@@ -177,6 +177,10 @@ export function useContentService() {
   const searchType = ref<SearchType>('search');
   const searchParent = ref<string | undefined>();
   const facetsTermsStates = ref<FacetTermStates | undefined>();
+  /**
+   * The beautified original JSON response, before any fixes.
+   */
+  const json = ref<string>();
   const result = ref<SearchResult | undefined>(undefined);
 
   /**
@@ -224,6 +228,7 @@ export function useContentService() {
 
     // The second value is a property in the Preservica JSON; it does not refer to, e.g., Vue's Ref
     result.value = ((await res.json()) as SearchResponse).value;
+    json.value = JSON.stringify(result.value, null, 2);
 
     // Fix `{ "name": "_interval_0 Pre 2015", "displayName": "_interval_0 Pre 2015", "count": 0 },`
     result.value.facets?.forEach((facet) => {
@@ -256,6 +261,7 @@ export function useContentService() {
     max,
     facetsTermsStates,
     search,
+    json,
     result,
   };
 }
