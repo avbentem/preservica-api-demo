@@ -434,22 +434,19 @@ export default defineComponent({
         // TODO This only works to include facet values; what about excluding facet values?
         Object.getOwnPropertyNames(newStates).forEach((facetName) => {
           const facet = newStates[facetName];
-          const field = this.query.fields.find((field) => field.name === facetName);
+          let field = this.query.fields.find((field) => field.name === facetName);
           Object.getOwnPropertyNames(facet).forEach((termName) => {
             const includeTerm = facet[termName];
-            const currentIndex = field?.values?.indexOf(termName);
-            if (
-              currentIndex !== undefined &&
-              currentIndex >= 0 &&
-              (includeTerm === null || !includeTerm)
-            ) {
+            const currentIndex = field?.values?.indexOf(termName) ?? -1;
+            if (currentIndex >= 0 && (includeTerm === null || !includeTerm)) {
               field?.values?.splice(currentIndex, 1);
             } else if (currentIndex === -1 && includeTerm === true) {
               if (!field) {
-                this.query.fields.push({
+                field = {
                   name: facetName,
                   values: [termName],
-                });
+                };
+                this.query.fields.push(field);
               } else {
                 if (!field.values) {
                   field.values = [];

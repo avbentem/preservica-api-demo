@@ -161,7 +161,12 @@ export function useContentService() {
       { name: 'xip.created', values: [] },
     ] as FieldValues[],
     sort: [{ sortFields: ['xip.created'], sortOrder: 'desc' }],
-    facets: ['xip.created', 'xip.format_group_r_Display'],
+    facets: [
+      'xip.created',
+      'xip.top_level_so',
+      'xip.content_type_r_Display',
+      'xip.format_group_r_Display',
+    ],
     'facet.xip.created.range': [
       ['*', '', 'Pre 2015'],
       ['2015-01-01', '', '2015'],
@@ -244,21 +249,19 @@ export function useContentService() {
       });
     });
 
-    // Ensure facetsTermState only holds constraints we know about in this result (like when the
-    // JSON has been edited since the previous search) and copy any existing value.
+    // Ensure facetsTermState only holds constraints we know about in this result, and copy any
+    // existing value.
     facetsTermsStates.value = result.value.facets.reduce((acc, facet) => {
       acc[facet.name] = facet.terms.reduce((terms, term) => {
-        if (facetsTermsStates.value) {
-          terms[term.name] = facetsTermsStates.value?.[facet.name][term.name] ?? null;
-        } else {
-          // For the very first search we may have specified filter values in `query.fields` that
-          // were not synced to the (non-existing) facet term checkboxes at that time. Some or all
-          // of those may now indeed be listed as existing facet terms: enable the checkbox then.
-          terms[term.name] =
-            query.value.fields
-              .find((field) => field.name === facet.name)
-              ?.values?.includes(term.name) ?? null;
-        }
+        // It may seem we could copy the values from the `facetsTermsStates` that was used for the
+        // search. But for the very first search, or whenever the JSON has been edited manually, we
+        // may have specified filter values in `query.fields` that were not synced to the (yet
+        // non-existing) facet term checkboxes at that time. Some or all of those may now indeed be
+        // listed as existing facet terms. So, enable the checkboxes based in field filters.
+        terms[term.name] =
+          query.value.fields
+            .find((field) => field.name === facet.name)
+            ?.values?.includes(term.name) ?? null;
         return terms;
       }, {} as TermStates);
       return acc;
