@@ -23,7 +23,7 @@
       </AccordionTab>
 
       <AccordionTab header="JSON">
-        <div class="json">{{ indexedFields }}</div>
+        <div class="json">{{ indexedFieldsJson }}</div>
       </AccordionTab>
     </Accordion>
   </div>
@@ -42,7 +42,7 @@ export default defineComponent({
 
   setup() {
     const { configured } = useAuth();
-    const { getIndexedFields } = useContentService();
+    const { getIndexedFields, indexedFieldsJson } = useContentService();
 
     const indexedFields = ref<IndexedField[] | undefined>(undefined);
     const filters = ref({
@@ -57,7 +57,7 @@ export default defineComponent({
       indexedFields.value = await getIndexedFields();
     };
 
-    return { configured, indexedFields, filters, multiSortMeta, getFields };
+    return { configured, indexedFields, indexedFieldsJson, filters, multiSortMeta, getFields };
   },
 });
 </script>

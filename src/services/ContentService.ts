@@ -27,6 +27,8 @@ export interface IndexedField {
   shortName: string;
   uri: string;
   index: string;
+  // The attribute shortKey is not present in versions before 6.2.2, for which this demo will add it
+  // by combining `shortName` and `index`
   shortKey: string;
   displayName: string;
   type: string;
@@ -180,6 +182,10 @@ export function useContentService() {
   });
 
   const indexedFields = ref<IndexedField[] | undefined>(undefined);
+  /**
+   * The beautified original JSON response, before any fixes.
+   */
+  const indexedFieldsJson = ref<string>();
   const indexedFieldsLookup = ref<IndexedFieldsLookup | undefined>(undefined);
   const metadata = ref(query.value.fields.map((field) => field.name).join());
 
@@ -191,8 +197,8 @@ export function useContentService() {
   /**
    * The beautified original JSON response, before any fixes.
    */
-  const json = ref<string>();
-  const result = ref<SearchResult | undefined>(undefined);
+  const searchResultJson = ref<string>();
+  const searchResult = ref<SearchResult | undefined>(undefined);
 
   /**
    * Fetch the indexed fields from the Content API and populate (and return) {@link indexedFields}.
@@ -201,8 +207,11 @@ export function useContentService() {
     const res = await fetchWithToken('api/content/indexed-fields');
     // The second value is a property in the Preservica JSON; it does not refer to, e.g., Vue's Ref
     indexedFields.value = ((await res.json()) as IndexedFieldsResponse).value;
+    indexedFieldsJson.value = JSON.stringify(indexedFields.value, null, 2);
 
     indexedFieldsLookup.value = indexedFields.value.reduce((acc, field) => {
+      // Versions older than 6.2.2 do not seem to include `shortKey`
+      field.shortKey = field.shortKey ?? `${field.shortName}.${field.index}`;
       acc[field.shortKey] = field;
       return acc;
     }, {} as IndexedFieldsLookup);
@@ -212,10 +221,10 @@ export function useContentService() {
 
   /**
    * Invoke one of the Content API's search endpoints based on {@link searchType} and using the
-   * current values of {@link metadata}, {@link query} and all, and populate {@link result}.
+   * current values of {@link metadata}, {@link query} and all, and populate {@link searchResult}.
    */
   const search = async () => {
-    result.value = undefined;
+    searchResult.value = undefined;
 
     const encodedParent = encodeURIComponent(searchParent.value || '');
     const paramSearchWithin =
@@ -238,11 +247,11 @@ export function useContentService() {
     });
 
     // The second value is a property in the Preservica JSON; it does not refer to, e.g., Vue's Ref
-    result.value = ((await res.json()) as SearchResponse).value;
-    json.value = JSON.stringify(result.value, null, 2);
+    searchResult.value = ((await res.json()) as SearchResponse).value;
+    searchResultJson.value = JSON.stringify(searchResult.value, null, 2);
 
     // Fix `{ "name": "_interval_0 Pre 2015", "displayName": "_interval_0 Pre 2015", "count": 0 },`
-    result.value.facets?.forEach((facet) => {
+    searchResult.value.facets?.forEach((facet) => {
       facet.terms.forEach((term) => {
         term.name = term.name.split(' ')[0];
         term.displayName = term.displayName.replace(/^_.*? /, '');
@@ -251,7 +260,7 @@ export function useContentService() {
 
     // Ensure facetsTermState only holds constraints we know about in this result, and copy any
     // existing value.
-    facetsTermsStates.value = result.value.facets.reduce((acc, facet) => {
+    facetsTermsStates.value = searchResult.value.facets.reduce((acc, facet) => {
       acc[facet.name] = facet.terms.reduce((terms, term) => {
         // It may seem we could copy the values from the `facetsTermsStates` that was used for the
         // search. But for the very first search, or whenever the JSON has been edited manually, we
@@ -271,6 +280,7 @@ export function useContentService() {
   return {
     getIndexedFields,
     indexedFields,
+    indexedFieldsJson,
     indexedFieldsLookup,
     searchType,
     searchParent,
@@ -280,7 +290,7 @@ export function useContentService() {
     max,
     facetsTermsStates,
     search,
-    json,
-    result,
+    searchResultJson,
+    searchResult,
   };
 }

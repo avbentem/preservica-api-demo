@@ -171,23 +171,23 @@
     </div>
   </div>
 
-  <div v-if="result">
-    <h2 v-if="!result.objectIds?.length">
-      No results{{ result.totalHits > 0 ? ` for start = ${start.toLocaleString('en')}` : '' }}
+  <div v-if="searchResult">
+    <h2 v-if="!searchResult.objectIds?.length">
+      No results{{ searchResult.totalHits > 0 ? ` for start = ${start.toLocaleString('en')}` : '' }}
     </h2>
     <h2 v-else>
       Results {{ (resultStart + 1).toLocaleString('en') }}&ndash;{{
-        (resultStart + result.objectIds?.length).toLocaleString('en')
+        (resultStart + searchResult.objectIds?.length).toLocaleString('en')
       }}
-      of {{ result.totalHits.toLocaleString('en') }}
+      of {{ searchResult.totalHits.toLocaleString('en') }}
     </h2>
     <Paginator
       :first="resultStart"
       :rows="resultMax"
-      :totalRecords="result.totalHits"
+      :totalRecords="searchResult.totalHits"
       @page="onPaginatorChange($event)"
     ></Paginator>
-    <div v-for="facet of result.facets" v-bind:key="facet.name" class="p-mb-4">
+    <div v-for="facet of searchResult.facets" v-bind:key="facet.name" class="p-mb-4">
       <h3>{{ facet.displayName }}</h3>
       <span v-for="term of facet.terms" v-bind:key="term.name" class="p-mx-1">
         [<Checkbox
@@ -331,8 +331,8 @@ export default defineComponent({
       max,
       search,
       facetsTermsStates,
-      json,
-      result,
+      searchResultJson,
+      searchResult,
     } = useContentService();
 
     const selectedFields = ref<IndexedField[] | undefined>([]);
@@ -384,8 +384,8 @@ export default defineComponent({
       facetsTermsStates,
       runSearch,
       onPaginatorChange,
-      json,
-      result,
+      searchResultJson,
+      searchResult,
       resultStart,
       resultMax,
       tableColumns,
@@ -588,11 +588,11 @@ export default defineComponent({
      * ```
      */
     tableResults(): TableRow[] {
-      if (!this.result) {
+      if (!this.searchResult) {
         return [];
       }
-      const results = this.result;
-      const rows = this.result.metadata.map((row: ResultMetadata[]) => {
+      const results = this.searchResult;
+      const rows = results.metadata.map((row: ResultMetadata[]) => {
         return row.reduce((acc: TableRow, curr: ResultMetadata) => {
           acc[curr.name] = curr.value;
           if (this.indexedFieldsLookup?.[curr.name]?.type?.indexOf('DATE') !== -1) {
