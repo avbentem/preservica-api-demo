@@ -272,7 +272,7 @@
       </AccordionTab>
 
       <AccordionTab header="JSON">
-        <div class="json">{{ json }}</div>
+        <div class="json">{{ searchResultJson }}</div>
       </AccordionTab>
     </Accordion>
   </div>
