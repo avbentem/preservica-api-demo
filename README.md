@@ -67,6 +67,9 @@ The actual viewer depends on the document, like:
 
 Some viewers may offer a full screen mode, which is explicitly allowed for our `<iframe>`.
 
+The viewer's URL is always `<API host>/Render/render/external?entity=IO&entityRef=...&token=...`
+regardless the content type. It will enforce a download if it cannot find a suitable viewer.
+
 Assets that are not stored on a readable storage adapter are not available for preview or download.
 
 ## Development
