@@ -126,6 +126,9 @@
             <i class="pi pi-times remove-filter" @click="removeFilter(field, c2)" />
           </span>
         </div>
+        <Tag v-if="isTopLevelListWithInvalidFilter(field)" severity="warning"
+          >top-level list only returns SO</Tag
+        >
       </div>
     </div>
     <div class="p-fluid p-formgrid p-grid p-text-left">
@@ -496,6 +499,18 @@ export default defineComponent({
     },
     removeFilter(field: FieldValues, index: number) {
       field.values?.splice(index, 1);
+    },
+    isTopLevelListWithInvalidFilter(field: FieldValues): boolean {
+      if (this.searchType !== 'top-level-list') {
+        return false;
+      }
+      return (
+        (field &&
+          // All-empty values are okay
+          field.values?.filter(Boolean).length !== 0 &&
+          !field.values?.find((value) => value.toLowerCase() === 'so')) ??
+        false
+      );
     },
     searchWithin(objectId: string) {
       this.searchType = 'search-within';
