@@ -4,7 +4,7 @@
     <TabView v-if="configured" @tab-change="onTabChange">
       <TabPanel header="Introduction">
         <p class="intro">
-          Search could be performed using either CMIS or the API, but to use facets
+          Search could be performed using either CMIS or the Content API, but to use facets
           <a href="https://developers.preservica.com/api-reference/8-content-api"
             >the Content API</a
           >
@@ -24,7 +24,7 @@
       <TabPanel header="Request">
         <div class="intro p-mb-6">
           <p>
-            This is the request that will be sent to the API, along with the values for
+            This is the request that will be sent to the Content API, along with the values for
             <code>start</code>, <code>max</code> and the optional <code>parenthierarchy</code> and
             <code>id</code> for some API types.
           </p>

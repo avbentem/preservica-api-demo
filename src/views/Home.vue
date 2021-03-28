@@ -2,8 +2,12 @@
   <div class="home intro">
     <h1>Preservica APIs demo</h1>
     <p>
-      This is a (work in progress) kitchen sink showing various usage examples for some of
-      <a href="https://developers.preservica.com/api-reference">the Preservica APIs.</a>
+      This is a (work in progress) kitchen sink showing various usage examples for some of the
+      Preservica APIs as documented
+      <a href="https://developers.preservica.com/api-reference">on their website</a> and in the
+      Swagger UI interfaces
+      <a href="https://eu.preservica.com/api/documentation.html">on your own instance</a>
+      (adjust URL to match your Cloud Edition domain).
     </p>
     <p>
       This demo application runs in your browser, but for a typical use case the APIs would be

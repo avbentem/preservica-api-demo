@@ -39,13 +39,11 @@
       only available when using SAML in conjunction with Universal Access.
     </p>
     <p>
-      <s
-        >The resulting access token can also (for a short time) be used in
-        <a href="https://eu.preservica.com/api/content/documentation.html"
-          >the Swagger UI interface</a
-        >
-        (adjust URL to match your Cloud Edition domain).</s
-      >
+      Even though the Swagger UI interface for the Authentication API uses the wrong Content Type
+      and throws a 400 Bad Request, a token created above can often (for a short time) be used when
+      clicking the "Authorize" button in
+      <a href="https://eu.preservica.com/api/documentation.html">the Swagger UI interfaces</a>
+      for the other APIs (adjust URL to match your Cloud Edition domain).
     </p>
   </div>
 </template>
