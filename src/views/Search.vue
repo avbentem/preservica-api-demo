@@ -506,6 +506,7 @@ export default defineComponent({
       }
       return (
         (field &&
+          field.name === 'xip.document_type' &&
           // All-empty values are okay
           field.values?.filter(Boolean).length !== 0 &&
           !field.values?.find((value) => value.toLowerCase() === 'so')) ??
