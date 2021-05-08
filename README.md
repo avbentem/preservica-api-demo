@@ -59,7 +59,9 @@ server would proxy these downloads and add the required authorisation header on 
 Just like for the document viewer, for downloads first a HEAD request is made to only show the
 download option when we know that Preservica can deliver that.
 
-The actual viewer depends on the document, like:
+The actual viewer depends on the document. Many file formats, including Word, Excel, PowerPoint and
+WordPerfect, are first converted to PDF using a server-side instance of LibreOffice. (See the
+document properties in the PDF viewer.) Some of the actual viewers:
 
 - PDF: [PDFjs](https://github.com/mozilla/pdf.js)
 - Image: [OpenSeadragon](https://openseadragon.github.io/)
@@ -68,7 +70,12 @@ The actual viewer depends on the document, like:
 Some viewers may offer a full screen mode, which is explicitly allowed for our `<iframe>`.
 
 The viewer's URL is always `<API host>/Render/render/external?entity=IO&entityRef=...&token=...`
-regardless the content type. It will enforce a download if it cannot find a suitable viewer.
+regardless the content type. It will enforce a download if it cannot find a suitable viewer. For
+a single entity, the Content API's `object-details` endpoint provides the actual URL [in its `links`
+array](https://usergroup.preservica.com/forums/topic/viewing-content-in-external-viewer/#post-5642)
+for `"rel": "render"`. This still needs `&token=` appended to the URL. The Content API's search
+endpoints do not provide this information, and this demo just uses a hardcoded base URL, which is
+not future proof.
 
 Assets that are not stored on a readable storage adapter are not available for preview or download.
 
