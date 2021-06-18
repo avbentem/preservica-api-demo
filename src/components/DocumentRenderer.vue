@@ -69,6 +69,8 @@ export default defineComponent({
 <style lang="scss" scoped="true">
 iframe {
   width: 100%;
-  height: 50vh;
+  // Audio MP3 player is not very high
+  height: 100%;
+  max-height: 50vh;
 }
 </style>
