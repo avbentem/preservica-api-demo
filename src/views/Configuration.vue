@@ -28,9 +28,13 @@
     </p>
     <p>
       An access token is also used for Preservica-provided thumbnails and embedded document viewer.
-      However, if keeping that viewer open beyond the token's lifetime, then the viewer may prompt
-      for credentials. (A sane browser should warn you that the credentials will not be sent to this
-      demo application, but to the Preservica server that hosts the embedded viewer.)
+      Prior to Preservica 6.3.1, keeping that viewer open beyond the token's lifetime, may have made
+      the viewer prompt for credentials. (Since 6.3.1
+      <a
+        href="https://usergroup.preservica.com/forums/topic/viewing-content-in-external-viewer/page/2/#post-5863"
+        >the token is refreshed and stored in a cookie if it was about to expire</a
+      >. For older versions, a sane browser should also warn you that any credentials will not be
+      sent to this demo application, but to the Preservica server that hosts the embedded viewer.)
     </p>
     <p>
       A token can also be generated through the externally authenticated acquisition API. This
