@@ -5,7 +5,7 @@
 # Run on port 9000, and proxy `/proxy/https://eu.preservica.com/a/b/c` to
 # `https://eu.preservica.com/a/b/c`
 #
-#   docker run -it -p 9000:80 --rm preservica-api-demo
+#   docker run -p 9000:80 --rm preservica-api-demo
 
 # Temporary (partially cached) build image
 FROM node:lts-alpine as build

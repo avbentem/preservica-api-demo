@@ -142,7 +142,7 @@ docker build -t preservica-api-demo .
 To run on <http://localhost:9000>:
 
 ```text
-docker run -it -p 9000:80 --rm preservica-api-demo
+docker run -p 9000:80 --rm preservica-api-demo
 ```
 
 ### Linting and Prettier
