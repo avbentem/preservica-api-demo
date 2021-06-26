@@ -36,7 +36,7 @@
           v-model="config.tenant"
           placeholder="code"
           v-tooltip="
-            'A short code, not a domain or URL (the same code is also configured in Universal Access)'
+            'Optional since 6.2.2, but validated if specified; a short code, not a domain or URL (the same code is also configured in Universal Access)'
           "
         />
       </div>

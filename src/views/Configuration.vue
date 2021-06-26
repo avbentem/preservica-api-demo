@@ -5,7 +5,7 @@
     <ConfigInput />
 
     <h2 v-if="!configured">Please complete the form and hit "Save" or "Log in"</h2>
-    <h2 v-if="user">Welcome, {{ user.fullName }}</h2>
+    <h2 v-if="user">Welcome, {{ user.fullName }} (on {{ user.tenant }})</h2>
 
     <p>
       The Preservica APIs needs authorization, even for anonymous access. Above you need to set

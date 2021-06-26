@@ -28,6 +28,8 @@ export interface AuthenticatedUser {
   user: string;
   fullName: string;
   email: string;
+  // Since 6.2.2 tenant is not required while authenticating, and is returned in the response
+  tenant: string;
   roles: string[];
   token: string;
   // This is named "refresh-token" in the Preservica API response
@@ -77,9 +79,13 @@ export class AuthService {
     this.clearAuth();
 
     const config = this.store.state.config;
+    // Since 6.2.2 tenant is optional, but still should only be given if set (in which case it's
+    // also validated)
     const body = `username=${encodeURIComponent(config.username)}&password=${encodeURIComponent(
       config.password
-    )}&tenant=${encodeURIComponent(config.tenant)}&includeUserDetails=true`;
+    )}${
+      config.tenant ? `&tenant=${encodeURIComponent(config.tenant)}` : ''
+    }&includeUserDetails=true`;
     const res = await this.fetchWithDefaults('api/accesstoken/login', {
       method: 'POST',
       headers: {
@@ -94,6 +100,7 @@ export class AuthService {
       user: json.user,
       fullName: json.fullName,
       email: json.email,
+      tenant: json.tenant,
       roles: json.roles,
       token: json.token,
       refreshToken: json['refresh-token'],

@@ -44,7 +44,8 @@ export default createStore<AppState>({
      */
     configured(state) {
       const config = state.config;
-      return !!config.host && !!config.tenant && !!config.username && !!config.password;
+      // Since Preservica 6.2.2, config.tenant is optional
+      return !!config.host && !!config.username && !!config.password;
     },
   },
   mutations: {
